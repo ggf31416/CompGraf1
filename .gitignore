@@ -4,8 +4,8 @@
 *.o
 # Permitir objetos .obj que sean graficos
 # .obj
-**/obj/Debug/**
-**/obj/Release/**
+**/obj/[Dd]ebug/**
+**/obj/[Rr]elease/**
 
 # Precompiled Headers
 *.gch
