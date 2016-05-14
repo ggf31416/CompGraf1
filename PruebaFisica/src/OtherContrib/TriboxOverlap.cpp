@@ -1,14 +1,14 @@
 /*
  * TriboxOverlap.cpp
  *
- *  Created on: 11 de may. de 2016
- *      Author: Guillermo
  */
 
-#include "../OtherContrib/TriboxOverlap.h"
+#include "TriboxOverlap.h"
 
 #include <math.h>
 #include <stdio.h>
+
+
 
 #define X 0
 #define Y 1
@@ -131,6 +131,7 @@ int planeBoxOverlap(float normal[3], float vert[3], float maxbox[3])	// -NJMP-
 
 
 
+
 int triBoxOverlap(float boxcenter[3],float boxhalfsize[3],float triverts[3][3])
 
 {
@@ -230,5 +231,6 @@ int triBoxOverlap(float boxcenter[3],float boxhalfsize[3],float triverts[3][3])
    return 1;   /* box and triangle overlaps */
 
 }
+
 
 

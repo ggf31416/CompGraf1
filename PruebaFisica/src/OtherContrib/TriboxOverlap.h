@@ -1,8 +1,6 @@
 /*
  * TriboxOverlap.h
  *
- *  Created on: 11 de may. de 2016
- *      Author: Guillermo
  */
 
 #ifndef OTHERCONTRIB_TRIBOXOVERLAP_H_
