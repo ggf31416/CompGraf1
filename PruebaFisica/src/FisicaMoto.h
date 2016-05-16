@@ -8,31 +8,19 @@
 #ifndef FISICAMOTO_H_
 #define FISICAMOTO_H_
 
-#include "MatGeoLib/Geometry/AABB.h"
-#include "MatGeoLib/Geometry/OBB.h"
-#include "MatGeoLib/Geometry/Triangle.h"
+#include "FisicaRueda.h"
 
-class FisicaRueda{
-	public:
-		FisicaRueda();
-		virtual ~FisicaRueda();
-		bool detectarColision(math::AABB obs);
-		bool detectarColision(math::OBB obs);
-		bool detectarColision(math::Triangle obs);
-
-		bool usarSoloBox;
-	private:
-		math::OBB boxRueda;
-		math::float3 centroRueda;
-		float radioRueda;
-};
 
 
 class FisicaMoto {
 public:
 	FisicaMoto();
 	virtual ~FisicaMoto();
+	void actualizarBBox();
+	void setTamanio(float largo,float alto,float profundidad,float y_ruedas,float x_rueda0,float x_rueda1, float radioRueda);
+	void setPosicion(float3 p);
 private:
+	math::AABB boundingBox;
 	math::OBB boxMayor;
 	math::OBB boxSuperior;
 	FisicaRueda* ruedas;
