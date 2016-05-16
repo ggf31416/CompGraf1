@@ -16,6 +16,7 @@ Gravedad::~Gravedad() {
 	// TODO Auto-generated destructor stub
 }
 
+// aceleracion por gravedad en pendiente
 // n es vector normal unitario
 // acelPendiente = g - n * dot_product(n,g);
 Vector3D Gravedad::AcelPendiente(const Vector3D& n){

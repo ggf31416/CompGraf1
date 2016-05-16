@@ -8,15 +8,18 @@
 #include "DeteccionColision.h"
 #include "OtherContrib/TriboxOverlap.h"
 #include "OtherContrib/kdtree.h"
-#include "MatGeoLib/Time/Clock.h"
-#include "MatGeoLib/Geometry/KDTree.h"
+#include "MatGeoLib/MathGeoLib.h"
 #include <set>
 #include "stdlib.h" // rand
 #include <time.h>       /* time */
 #include <vector>
 #include <iostream>
 
+using namespace math;
 
+
+
+std::vector<math::AABB> resultados;
 
 DeteccionColision::DeteccionColision() {
 	// TODO Auto-generated constructor stub
@@ -26,6 +29,26 @@ DeteccionColision::DeteccionColision() {
 DeteccionColision::~DeteccionColision() {
 	// TODO Auto-generated destructor stub
 }
+
+
+class Obstaculo{
+public:
+	AABB boundingBox;
+
+	 bool Intersects(const AABB &q) const{
+		 return boundingBox.Intersects(q);
+	 }
+
+};
+
+
+bool LeafCallbackFunction(KdTree<math::AABB> &tree, KdTreeNode &leaf, const AABB &aabb){
+	resultados.push_back(tree.Object(leaf.bucketIndex));
+	return false;
+}
+
+
+
 
 void DeteccionColision::test(){
 	math::Clock clk;
@@ -37,12 +60,13 @@ void DeteccionColision::test(){
 		math::AABB aabb(r_vec, r_vec + r_long);
 		boxes.push_back(aabb);
 	}
-	/*math::KdTree<math::AABB> mathGeoKd;
+	math::KdTree<math::AABB> mathGeoKd;
 	for(int i = 0; i < boxes.size(); i++){
-		mathGeoKd.AddObjects(boxes[i],1);
-	}*/
+		math::AABB b = boxes[i];
+		mathGeoKd.AddObjects(&b,1);
+	}
 
-	kdtree* cKD = kd_create(3);
+	/*kdtree* cKD = kd_create(3);
 
 	for(int i = 0; i < boxes.size(); i++){
 		math::AABB a  = boxes[i];
@@ -50,7 +74,7 @@ void DeteccionColision::test(){
 		for(int k = 0; k < 7; k++){
 			kd_insert3f(cKD,coords[k / 4].x,coords[(k / 2) % 2].y,coords[k % 2].z,(void*)&a);
 		}
-	}
+	}*/
 
 	std::vector<AABB> rangos;
 
@@ -67,17 +91,14 @@ void DeteccionColision::test(){
 
 
 	int total_match = 0;
+	//bool (*f)(KdTree<math::AABB>,KdTreeNode,const AABB);
+	//f = &LeafCallbackFunction;
 	math::tick_t t1 = clk.Tick();
 	for(int i = 0; i < rangos.size(); i++){
-		std::set<float> resultados;
-		float3 centro = rangos[i].CenterPoint();
-		kdres* res = kd_nearest_range3f(cKD,centro.x,centro.y,centro.z,rango);
-		while(kd_res_next(res)){
-			math::AABB  d = *(AABB*)kd_res_item_data(res);
-			resultados.emplace(d.MinX() * d.MinY() * d.MinZ() );
-		}
-		kd_res_free(res);
+
+		mathGeoKd.AABBQuery(rangos[i],LeafCallbackFunction);
 		total_match += resultados.size();
+		resultados.clear();
 	}
 	std::cout <<"C Kd-tree: " << clk.MillisecondsSinceF(t1) << "  tm: " + total_match << "\n";
 

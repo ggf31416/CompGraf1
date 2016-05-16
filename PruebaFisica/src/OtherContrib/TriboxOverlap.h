@@ -1,4 +1,7 @@
+
+//http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox3.txt
 /*
+
  * TriboxOverlap.h
  *
  */
