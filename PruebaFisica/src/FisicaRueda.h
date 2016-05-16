@@ -15,7 +15,7 @@
 class FisicaRueda{
 	public:
 		FisicaRueda();
-		FisicaRueda(float3 centroRueda,float radioRueda)
+		FisicaRueda(float3 centroRueda,float radioRueda,float anchoRueda);
 		virtual ~FisicaRueda();
 		bool detectarColision(math::AABB obs);
 		bool detectarColision(math::OBB obs);
@@ -29,6 +29,7 @@ class FisicaRueda{
 		math::OBB boxRueda;
 		math::float3 centroRueda;
 		float radioRueda;
+		float anchoRueda;
 
 
 	private:

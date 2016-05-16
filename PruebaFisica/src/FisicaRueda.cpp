@@ -17,9 +17,10 @@ FisicaRueda::FisicaRueda(){
 	usarSoloBox = false;
 }
 
-FisicaRueda::FisicaRueda(float3 centroRueda,float radioRueda){
+FisicaRueda::FisicaRueda(float3 centroRueda,float radioRueda,float anchoRueda){
 	this->centroRueda =centroRueda;
 	this->radioRueda = radioRueda;
+	this->anchoRueda = anchoRueda;
 	this->usarSoloBox = false;
 }
 
@@ -52,6 +53,8 @@ bool FisicaRueda::detectarColision(Triangle obs){
 void FisicaRueda::transladar(float3 vec){
 	this->centroRueda = centroRueda + vec;
 }
+
+
 
 
 

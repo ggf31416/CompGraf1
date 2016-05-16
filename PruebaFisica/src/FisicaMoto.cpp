@@ -41,13 +41,14 @@ void FisicaMoto::actualizarBBox(){
  * Las ruedas quedan centradas e
  */
 void FisicaMoto::setTamanio(float largo,float alto,float profundidad,float y_ruedas,float x_rueda0,float x_rueda1, float radioRueda){
+	float anchoRueda = 0;
 	float3 inicio = float3(0,radioRueda - y_ruedas,0);
 	float3 boxSize = float3(largo,alto,profundidad);
 	AABB base(inicio,inicio + boxSize);
 	this->boxMayor = base; // conviete el AABB en OBB
 	this->ruedas = new FisicaRueda[2];
-	FisicaRueda r0(float3(x_rueda0, radioRueda,profundidad / 2),radioRueda);
-	FisicaRueda r1(float3(x_rueda1, radioRueda,profundidad / 2),radioRueda);
+	FisicaRueda r0(float3(x_rueda0, radioRueda,profundidad / 2),radioRueda,anchoRueda);
+	FisicaRueda r1(float3(x_rueda1, radioRueda,profundidad / 2),radioRueda,anchoRueda);
 	this->ruedas[0] = r0;
 	this->ruedas[1] = r1;
 	actualizarBBox();
@@ -57,6 +58,12 @@ void FisicaMoto::trasladar(float3 vec){
 	this->boxMayor.Translate(vec);
 	this->ruedas[0].transladar(vec);
 	this->ruedas[1].transladar(vec);
+}
+
+// TODO
+void FisicaMoto::establecerDireccion(float3 vec){
+	float3 eje1 = vec.Normalized();
+	//float3 eje2 = float3(-eje1.y)
 }
 
 // calcular altura de un punto dentro de un triangulo
