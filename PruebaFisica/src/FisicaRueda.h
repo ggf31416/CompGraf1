@@ -8,19 +8,18 @@
 #ifndef FISICARUEDA_H_
 #define FISICARUEDA_H_
 
-#include "MatGeoLib/Geometry/AABB.h"
-#include "MatGeoLib/Geometry/OBB.h"
-#include "MatGeoLib/Geometry/Triangle.h"
+#include "MatGeoLib/Geometry/GeometryAll.h"
+
 
 class FisicaRueda{
 	public:
 		FisicaRueda();
-		FisicaRueda(float3 centroRueda,float radioRueda,float anchoRueda);
+		FisicaRueda(math::float3 centroRueda,float radioRueda,float anchoRueda);
 		virtual ~FisicaRueda();
-		bool detectarColision(math::AABB obs);
-		bool detectarColision(math::OBB obs);
-		bool detectarColision(math::Triangle obs);
-		void transladar(float3 vec);
+		bool colisiona(const math::AABB &obs) ;
+		bool colisiona(const math::OBB &obs) ;
+		bool colisiona(const math::Triangle &obs) ;
+		void transladar(math::float3 vec);
 
 
 		bool usarSoloBox;

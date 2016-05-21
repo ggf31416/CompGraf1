@@ -6,7 +6,6 @@
  */
 
 #include "FisicaMoto.h"
-#include "Vector3D.h"
 
 
 
@@ -60,10 +59,22 @@ void FisicaMoto::trasladar(float3 vec){
 	this->ruedas[1].transladar(vec);
 }
 
+void establecerEjes(OBB box,float3* ejes){
+	box.axis[0] = ejes[0];
+	box.axis[1] = ejes[1];
+	box.axis[2] = ejes[2];
+
+}
 // TODO
-void FisicaMoto::establecerDireccion(float3 vec){
-	float3 eje1 = vec.Normalized();
-	//float3 eje2 = float3(-eje1.y)
+void FisicaMoto::establecerDireccion(float3  adelante){
+	float3 adelante_n = adelante.Normalized();
+	Quat q = Quat::LookAt(float3::unitX,adelante_n,float3::unitZ,float3::unitZ);
+	ejes[0] = q * float3::unitX;
+	ejes[1] = q * float3::unitY;
+	ejes[2] = q * float3::unitZ;
+	establecerEjes(this->boxMayor,this->ejes);
+	establecerEjes(this->ruedas[0].boxRueda,this->ejes);
+	establecerEjes(this->ruedas[1].boxRueda,this->ejes);
 }
 
 // calcular altura de un punto dentro de un triangulo
@@ -91,6 +102,16 @@ float calcY(float3 p1, float3 p2, float3 p3, float x, float z){
 	// y = (D - Ax - Cz) / B
 	float y = (d - abc.x * x - abc.z * z);
 	return y;
+}
+
+bool FisicaMoto::colisiona(const math::AABB &obs) {
+	return this->boxMayor.Intersects(obs);
+}
+bool FisicaMoto::colisiona(const math::OBB &obs) {
+	return this->boxMayor.Intersects(obs);
+}
+bool FisicaMoto::colisiona(const math::Triangle &obs) {
+	return this->boxMayor.Intersects(obs);
 }
 
 

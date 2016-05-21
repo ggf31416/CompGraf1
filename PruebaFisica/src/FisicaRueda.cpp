@@ -15,6 +15,7 @@
 FisicaRueda::FisicaRueda(){
 	radioRueda =0;
 	usarSoloBox = false;
+	anchoRueda = 0;
 }
 
 FisicaRueda::FisicaRueda(float3 centroRueda,float radioRueda,float anchoRueda){
@@ -29,21 +30,21 @@ FisicaRueda::~FisicaRueda(){
 }
 
 
-bool FisicaRueda::detectarColision(AABB obs){
+bool FisicaRueda::colisiona(const math::AABB &obs) {
 	if (this->boxRueda.Intersects(obs)){
 		return usarSoloBox || this->centroRueda.Distance(obs) < this->radioRueda;
 	}
 	return false;
 }
 
-bool FisicaRueda::detectarColision(OBB obs){
+bool FisicaRueda::colisiona(const math::OBB &obs) {
 	if (this->boxRueda.Intersects(obs)){
 		return usarSoloBox || this->centroRueda.Distance(obs) < this->radioRueda;
 	}
 	return false;
 }
 
-bool FisicaRueda::detectarColision(Triangle obs){
+bool FisicaRueda::colisiona(const math::Triangle &obs) {
 	if (this->boxRueda.Intersects(obs)){
 		return usarSoloBox || this->centroRueda.Distance(obs) < this->radioRueda;
 	}

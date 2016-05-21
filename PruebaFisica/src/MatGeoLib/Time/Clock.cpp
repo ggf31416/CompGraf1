@@ -15,7 +15,7 @@
 /** @file Clock.cpp
 	@brief */
 
-//#define WIN32 // para hacer funcionar el clock
+
 
 #if defined(__unix__) || defined(__native_client__) || defined(EMSCRIPTEN) || defined(ANDROID) || defined(__APPLE__) || defined (__CYGWIN__)
 #include <time.h>
