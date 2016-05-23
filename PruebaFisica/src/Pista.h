@@ -12,7 +12,7 @@
 #include "ObjetoFisico.h"
 #include "MatGeoLib/Geometry/GeometryAll.h"
 
-namespace test {
+namespace fisica {
 
 
 class Pista : public ObjetoFisico {

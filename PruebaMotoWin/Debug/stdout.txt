@@ -1,0 +1,2 @@
+1 frames in 9.043 seconds = 0.110583 FPS
+172 frames in 17.408 seconds = 9.88051 FPS

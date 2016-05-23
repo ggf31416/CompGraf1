@@ -1,0 +1,13 @@
+Info,  T0: Load /home/bruno/eclipseWorkspace/PruebaMoto/res/Models/PEUGEOT_103 .3ds
+Debug, T0: Assimp 3.0.1262 amd64 gcc debug shared singlethreaded
+Info,  T0: Found a matching importer for this file format
+Info,  T0: Import root directory is '/home/bruno/eclipseWorkspace/PruebaMoto/res/Models/'
+Info,  T0: 3DS file format version: 3
+Info,  T0: 3DS: Generating default material
+Warn,  T0: No hierarchy information has been found in the file. 
+Info,  T0: Entering post processing pipeline
+Debug, T0: TriangulateProcess begin
+Debug, T0: TriangulateProcess finished. There was nothing to be done.
+Debug, T0: FlipUVsProcess begin
+Debug, T0: FlipUVsProcess finished
+Info,  T0: Leaving post processing pipeline

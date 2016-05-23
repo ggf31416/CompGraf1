@@ -8,7 +8,7 @@
 #include "Rampa.h"
 #include "BoxObstaculo.h"
 
-namespace test {
+namespace fisica {
 
 using namespace math;
 
@@ -35,13 +35,13 @@ Rampa::Rampa(float3* superiores,float alturaMenor, float alturaMayor  ) {
 	this->pista = new Pista(s);
 }
 
-void Rampa::generarObjetos(std::vector<ObjetoFisico*> lista){
+void Rampa::generarObjetos(std::vector<ObjetoFisico*> *lista){
 	BoxObstaculo* inf = new BoxObstaculo(this->boxInferior);
 	BoxObstaculo* atras = new BoxObstaculo(this->boxTrasero);
 
-	lista.push_back(this->pista);
-	lista.push_back(inf);
-	lista.push_back(atras);
+	lista->push_back(this->pista);
+	lista->push_back(inf);
+	lista->push_back(atras);
 
 }
 

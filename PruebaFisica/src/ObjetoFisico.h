@@ -12,7 +12,7 @@
 #include "FisicaMoto.h"
 
 
-namespace test {
+namespace fisica {
 
 /*
  * Clase abstracta para representar un elemento que interactua con la moto,

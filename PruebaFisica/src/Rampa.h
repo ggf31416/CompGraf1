@@ -12,7 +12,7 @@
 #include "Pista.h"
 #include <vector>
 
-namespace test {
+namespace fisica {
 
 class Rampa{
 public:
@@ -20,7 +20,7 @@ public:
 	virtual ~Rampa();
 	math::AABB getAABB();
 	Pista getPista();
-	void generarObjetos(std::vector<ObjetoFisico*> lista);
+	void generarObjetos(std::vector<ObjetoFisico*> *lista);
 private:
 	math::float3 superior[];
 	math::float3 inferior[];
