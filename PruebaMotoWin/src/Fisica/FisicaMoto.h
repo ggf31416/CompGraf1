@@ -24,11 +24,14 @@ public:
 	void setPosicion(math::float3 p);
 	void trasladar(math::float3 vec);
 	void establecerDireccion(math::float3 vec);
+	void rotar(float grados,math::float3 centro);
+
 	bool colisiona(const math::AABB &obs) ;
 	bool colisiona(const math::OBB &obs) ;
 	bool colisiona(const math::Triangle &obs) ;
-private:
 	math::AABB boundingBox;
+private:
+
 	math::OBB boxMayor;
 	math::OBB boxSuperior;
 	math::float3 ejes[];

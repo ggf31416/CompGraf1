@@ -10,11 +10,15 @@
 
 #include "Rampa.h"
 #include "ObjetoFisico.h"
+#include "ObjetoContainer.h"
 #include "Gravedad.h"
+#include "MatGeoLib/Geometry/KDTree.h"
 #include <vector>
 
 class ManejadorFisica {
 public:
+
+
 	ManejadorFisica();
 
 	void registrarRampaConObs(float* arr,  unsigned char* arribaIdx, unsigned char* abajoIdx) ;
@@ -29,13 +33,24 @@ public:
 
 	void simular(float dt);
 
+	void test();
+
+
+
 	virtual ~ManejadorFisica();
 
+
+
 private:
+	//math::KdTree<AABB> arbol;
+	void detectarColisionMoto();
+	void detectarColision(AABB q,std::vector<fisica::ObjetoFisico*>& lst);
 	std::vector<fisica::ObjetoFisico*>* objetos;
+	FisicaMoto* fm;
 	Gravedad g;
 	bool choco;
 	bool sobrePista;
+
 };
 
 #endif /* MANEJADORFISICA_H_ */

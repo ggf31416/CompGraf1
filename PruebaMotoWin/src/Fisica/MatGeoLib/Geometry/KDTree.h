@@ -20,8 +20,9 @@
 #include "../Math/MathTypes.h"
 #include "../Math/myassert.h"
 #include "Triangle.h"
-//#include "../Math/float2.h"
-//#include "../Geometry/Ray.h"
+#include "../Math/float2.h"
+#include "../Geometry/Ray.h"
+#include <vector>
 
 
 #ifdef MATH_CONTAINERLIB_SUPPORT
@@ -153,6 +154,57 @@ public:
 			returns afterwards. If the callback function returns false, the execution of the query continues. */
 	template<typename Func>
 	inline void AABBQuery(const AABB &aabb, Func &leafCallback);
+
+
+	void AABBQuery(const AABB &aabb, std::vector<T*> *lista){
+		const int cMaxStackItems = maxTreeDepth*2;
+
+		KdTreeNode *stack[cMaxStackItems];
+		int stackSize = 1;
+		stack[0] = Root();
+
+		// Don't enter the main iteration loop at all if no overlap occurs at the top level.
+		if (!aabb.Intersects(BoundingAABB()))
+			return;
+
+		while(stackSize > 0)
+		{
+			KdTreeNode *cur = stack[--stackSize];
+			assert(!cur->IsLeaf());
+
+			// We know that aabb intersects with the AABB of the current node, which allows
+			// most of the AABB-AABB intersection tests to be ignored.
+
+			// Does the aabb overlap with the left child?
+			if (aabb.minPoint[cur->splitAxis] <= cur->splitPos)
+			{
+				KdTreeNode *leftChild = &nodes[cur->LeftChildIndex()];
+				if (leftChild->IsLeaf()) // Leafs are processed immediately, no need to put them to stack for later.
+				{
+					/*if (leafCallback(*this, *leftChild, aabb))
+						return; // The callback requested to terminate the query, so quit.*/
+					T* p =  &Object(leftChild->bucketIndex);
+					lista->push_back(p);
+				}
+				else // The left child is an inner node, push it to stack.
+					stack[stackSize++] = leftChild;
+			}
+
+			// Does the aabb overlap with the right child?
+			if (aabb.maxPoint[cur->splitAxis] >= cur->splitPos)
+			{
+				KdTreeNode *rightChild = &nodes[cur->RightChildIndex()];
+				if (rightChild->IsLeaf()) // Leafs are processed immediately, no need to put them to stack for later.
+				{
+					//leafCallback(*this, *rightChild, aabb)
+					T* p = &Object(rightChild->bucketIndex);
+					lista->push_back(p);
+				}
+				else // The right child is an inner node, push it to stack.
+					stack[stackSize++] = rightChild;
+			}
+		}
+	}
 
 #if 0 ///\bug Doesn't work properly. Fix up!
 	/// Performs an intersection query of this kD-tree against a given kD-tree, and calls the given

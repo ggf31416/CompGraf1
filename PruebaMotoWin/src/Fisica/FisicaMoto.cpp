@@ -59,6 +59,11 @@ void FisicaMoto::trasladar(float3 vec){
 	this->ruedas[1].transladar(vec);
 }
 
+void FisicaMoto::rotar(float grados,math::float3 centro){
+	Quat q;
+	q.RotateZ(grados);
+}
+
 void establecerEjes(OBB box,float3* ejes){
 	box.axis[0] = ejes[0];
 	box.axis[1] = ejes[1];
@@ -97,7 +102,7 @@ float calcY(float3 p1, float3 p2, float3 p3, float x, float z){
 	float3 v1 = p2 - p1;
 	float3 v2 = p3 - p1;
 	float3 abc = v1.Cross(v2);
-	float d = -(abc.x * p1.x + abc.y * p1.y + abc.z * p1.z);
+	float d = -abc.Dot(p1);// -(abc.x * p1.x + abc.y * p1.y + abc.z * p1.z);
 	// Ax + By + Cz = -D
 	// y = (D - Ax - Cz) / B
 	float y = (d - abc.x * x - abc.z * z);

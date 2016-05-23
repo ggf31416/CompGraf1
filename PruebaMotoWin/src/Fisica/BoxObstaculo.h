@@ -19,13 +19,15 @@ public:
 	BoxObstaculo(math::AABB box) : ObjetoFisico(){
 		this->aabb = box;
 	}
+
+	BoxObstaculo(): ObjetoFisico(){}
 	virtual ~BoxObstaculo(){
 
 	}
 	bool esObstaculo(){
 		return true;
 	}
-	 math::AABB getAABB(){
+	 math::AABB getAABB() const{
 		 return aabb;
 	 }
 	 math::AABB aabb;

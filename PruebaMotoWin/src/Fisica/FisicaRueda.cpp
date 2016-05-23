@@ -7,7 +7,7 @@
 
 #include "FisicaRueda.h"
 
-
+using namespace math;
 /*
  * Fisica Rueda
  */
@@ -16,6 +16,7 @@ FisicaRueda::FisicaRueda(){
 	radioRueda =0;
 	usarSoloBox = false;
 	anchoRueda = 0;
+	actualizarBox();
 }
 
 FisicaRueda::FisicaRueda(float3 centroRueda,float radioRueda,float anchoRueda){
@@ -23,12 +24,16 @@ FisicaRueda::FisicaRueda(float3 centroRueda,float radioRueda,float anchoRueda){
 	this->radioRueda = radioRueda;
 	this->anchoRueda = anchoRueda;
 	this->usarSoloBox = false;
+	actualizarBox();
 }
 
 FisicaRueda::~FisicaRueda(){
 
 }
 
+void FisicaRueda::actualizarBox(){
+	this->boxRueda = AABB::FromCenterAndSize(this->centroRueda,float3(2 * this->radioRueda,2 * this->radioRueda,this->anchoRueda));
+}
 
 bool FisicaRueda::colisiona(const math::AABB &obs) {
 	if (this->boxRueda.Intersects(obs)){
@@ -53,6 +58,7 @@ bool FisicaRueda::colisiona(const math::Triangle &obs) {
 
 void FisicaRueda::transladar(float3 vec){
 	this->centroRueda = centroRueda + vec;
+	actualizarBox();
 }
 
 

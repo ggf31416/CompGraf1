@@ -32,11 +32,13 @@ public:
 	virtual bool esObstaculo(){
 		return false;
 	}
-	math::AABB getAABB(){
+	math::AABB getAABB() const {
 		return aabb;
 	}
-private:
 	math::float3 puntos[4];
+
+private:
+
 	math::AABB aabb;
 };
 } /* namespace test */

@@ -6,6 +6,8 @@
 # .obj
 **/obj/[Dd]ebug/**
 **/obj/[Rr]elease/**
+**/[Dd]ebug/**
+**/[Rr]elease/**
 
 # objectos de eclipse
 .metadata

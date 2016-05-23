@@ -12,6 +12,7 @@
 
 #include "camera.h"
 #include "Model.h"
+#include "Fisica/ManejadorFisica.h"
 
 #define SCREEN_WIDTH  256
 #define SCREEN_HEIGHT 256
@@ -28,6 +29,8 @@ GLuint ramp_list;
 GLfloat inicioNivel[3] = {-10,0,0};
 GLfloat finNivel[3] = {10,0,0};
 GLdouble angulo = 0;//Angulo de inclinacion de la moto
+
+ManejadorFisica* manejador;
 
 void quit(int ret)
 {
@@ -101,24 +104,26 @@ void handle_key_press(SDL_keysym * keysym)
 
 
 
-void mostrarObstaculo(){
-    static GLfloat vertices[] = {
-              -0.25, -3.0, -0.25, // 0
-               0.25, -3.0, -0.25, // 1
-               0.25,  3.0, -0.25, // 2
-              -0.25,  3.0, -0.25, // 3
-              -0.25, -3.0,  0.25, // 4
-               0.25, -3.0,  0.25, // 5
-               0.25,  1.0,  0.25, // 6
-              -0.25,  1.0,  0.25, // 7
-      };
+static GLfloat vertices[] = {
+          -0.25, -3.0, -0.25, // 0
+           0.25, -3.0, -0.25, // 1
+           0.25,  3.0, -0.25, // 2
+          -0.25,  3.0, -0.25, // 3
+          -0.25, -3.0,  0.25, // 4
+           0.25, -3.0,  0.25, // 5
+           0.25,  1.0,  0.25, // 6
+          -0.25,  1.0,  0.25, // 7
+  };
 
-      static GLubyte front_indices[] = {4, 5, 6, 7};
-      static GLubyte right_indices[] = {1, 2, 6, 5};
-      static GLubyte bottom_indices[] = {0, 1, 5, 4};
-      static GLubyte back_indices[] = {0, 3, 2, 1};
-      static GLubyte left_indices[] = {0, 4, 7, 3};
-      static GLubyte top_indices[] = {2, 3, 7, 6};
+  static GLubyte front_indices[] = {4, 5, 6, 7};
+  static GLubyte right_indices[] = {1, 2, 6, 5};
+  static GLubyte bottom_indices[] = {0, 1, 5, 4};
+  static GLubyte back_indices[] = {0, 3, 2, 1};
+  static GLubyte left_indices[] = {0, 4, 7, 3};
+  static GLubyte top_indices[] = {2, 3, 7, 6};
+
+
+void mostrarObstaculo(){
 
       glEnableClientState(GL_VERTEX_ARRAY);
       glVertexPointer(3, GL_FLOAT, 0, vertices);
@@ -305,8 +310,15 @@ int draw_gl_scene()
 	return (TRUE);
 }
 
+void configurarFisica(){
+	manejador = new ManejadorFisica();
+	manejador->establecerGravedad(0.1);
+}
+
 int main(int argc, char *argv[])
 {
+
+	configurarFisica();
 	/* Flags to pass to SDL_SetVideoMode */
 	int video_flags;
 	/* main loop variable */

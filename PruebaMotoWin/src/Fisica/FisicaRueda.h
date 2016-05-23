@@ -8,6 +8,7 @@
 #ifndef FISICARUEDA_H_
 #define FISICARUEDA_H_
 
+#include "MatGeoLib/Geometry/AABB.h"
 #include "MatGeoLib/Geometry/OBB.h"
 #include "MatGeoLib/Geometry/Triangle.h"
 
@@ -26,14 +27,14 @@ class FisicaRueda{
 		bool usarSoloBox;
 
 
-		math::OBB boxRueda;
+		math::AABB boxRueda;
 		math::float3 centroRueda;
 		float radioRueda;
 		float anchoRueda;
 
 
 	private:
-
+		void actualizarBox();
 
 };
 

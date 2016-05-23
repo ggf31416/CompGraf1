@@ -25,7 +25,7 @@ public:
 	ObjetoFisico();
 	virtual ~ObjetoFisico();
 	virtual bool esObstaculo() = 0;
-	virtual math::AABB getAABB() = 0;
+	virtual math::AABB getAABB() const = 0;
 	virtual bool colisiona(FisicaMoto &fm){
 		math::AABB aabb = getAABB();
 		return fm.colisiona(aabb);
@@ -34,6 +34,15 @@ public:
 		math::AABB aabb = getAABB();
 		return fr.colisiona(aabb);
 	}
+
+	math::AABB BoundingAABB() const{
+		return getAABB();
+	}
+
+	 bool Intersects(const AABB &q) const{
+		 return getAABB().Intersects(q);
+	 }
+
 
 };
 

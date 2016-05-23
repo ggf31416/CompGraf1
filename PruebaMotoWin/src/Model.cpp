@@ -1,4 +1,6 @@
 #include "Model.h"
+#include <iostream>
+#include "Fisica/MatGeoLib/Time/Clock.h"
 
 namespace model {
 
@@ -63,12 +65,16 @@ void Model::get_bounding_box_for_node (const aiNode* nd,
 /* ---------------------------------------------------------------------------- */
 void Model::get_bounding_box (aiVector3D* min, aiVector3D* max)
 {
+	math::Clock clock;
+	math::tick_t t1 = clock.Tick();
 	aiMatrix4x4 trafo;
 	aiIdentityMatrix4(&trafo);
 
 	min->x = min->y = min->z =  1e10f;
 	max->x = max->y = max->z = -1e10f;
 	get_bounding_box_for_node(scene->mRootNode,min,max,&trafo);
+
+	std::cout << "ms get_bounding_box: " << clock.MillisecondsSinceF(t1) << " ms\n";
 }
 
 /* ---------------------------------------------------------------------------- */
@@ -158,6 +164,8 @@ void Model::apply_material(const aiMaterial *mtl)
 /* ---------------------------------------------------------------------------- */
 void Model::recursive_render (const aiScene *sc, const aiNode* nd)
 {
+
+
 	unsigned int i;
 	unsigned int n = 0, t;
 	aiMatrix4x4 m = nd->mTransformation;
@@ -214,6 +222,8 @@ void Model::recursive_render (const aiScene *sc, const aiNode* nd)
 	}
 
 	glPopMatrix();
+
+
 }
 
 /* ---------------------------------------------------------------------------- */
@@ -284,6 +294,9 @@ void Model::display()
 /* ---------------------------------------------------------------------------- */
 int Model::loadasset (const char* path)
 {
+
+	math::Clock clock;
+	math::tick_t t1 = clock.Tick();
 	/* we are taking one of the postprocessing presets to avoid
 	   spelling out 20+ single postprocessing flags here. */
 	scene = aiImportFile(path,aiProcessPreset_TargetRealtime_MaxQuality);
@@ -293,8 +306,10 @@ int Model::loadasset (const char* path)
 		scene_center.x = (scene_min.x + scene_max.x) / 2.0f;
 		scene_center.y = (scene_min.y + scene_max.y) / 2.0f;
 		scene_center.z = (scene_min.z + scene_max.z) / 2.0f;
+		std::cout << "ms loadasset: " << clock.MillisecondsSinceF(t1) << " ms\n";
 		return 1;
 	}
+	std::cout << "ms loadasset failed: " << clock.MillisecondsSinceF(t1) << " ms\n";
 	return 0;
 }
 
