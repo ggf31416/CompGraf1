@@ -65,8 +65,8 @@ void Model::get_bounding_box_for_node (const aiNode* nd,
 /* ---------------------------------------------------------------------------- */
 void Model::get_bounding_box (aiVector3D* min, aiVector3D* max)
 {
-	math::Clock clock;
-	math::tick_t t1 = clock.Tick();
+	//math::Clock clock;
+	//math::tick_t t1 = clock.Tick();
 	aiMatrix4x4 trafo;
 	aiIdentityMatrix4(&trafo);
 
@@ -74,7 +74,7 @@ void Model::get_bounding_box (aiVector3D* min, aiVector3D* max)
 	max->x = max->y = max->z = -1e10f;
 	get_bounding_box_for_node(scene->mRootNode,min,max,&trafo);
 
-	std::cout << "ms get_bounding_box: " << clock.MillisecondsSinceF(t1) << " ms\n";
+	//std::cout << "ms get_bounding_box: " << clock.MillisecondsSinceF(t1) << " ms\n";
 }
 
 /* ---------------------------------------------------------------------------- */

@@ -119,9 +119,32 @@ void rot_x(struct cam_t & cam, GLfloat angle)
         compg_vector3f vright = mul_scalar(cam.up_vec, sin(angle*PIdiv180));
         compg_vector3f view = add_v3f(vleft, vright);
 	cam.view_dir = normalize_v3f(view);
+}
+
+void rot_x(struct cam_t & cam, GLfloat angle, GLfloat min, GLfloat max)
+{
+	if (cam.rotated_x + angle < min) angle = cam.rotated_x - min;
+	if (cam.rotated_x + angle > max) angle = max - cam.rotated_x;
+	cam.rotated_x += angle;
+        compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
+        compg_vector3f vright = mul_scalar(cam.up_vec, sin(angle*PIdiv180));
+        compg_vector3f view = add_v3f(vleft, vright);
+	cam.view_dir = normalize_v3f(view);
 	cam.up_vec = mul_scalar(cross_product_v3f(&cam.view_dir, &cam.right_vec), -1);
 }
 
+void rot_y(struct cam_t & cam, GLfloat angle, GLfloat min, GLfloat max)
+{
+
+	if (cam.rotated_y + angle < min) angle = cam.rotated_y - min;
+	if (cam.rotated_y + angle > max) angle = max - cam.rotated_y;
+	cam.rotated_y += angle;
+        compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
+        compg_vector3f vright = mul_scalar(cam.right_vec, sin(angle*PIdiv180));
+        compg_vector3f view = sub_v3f(vleft, vright);
+	cam.view_dir = normalize_v3f(view);
+	cam.right_vec = cross_product_v3f(&cam.view_dir, &cam.up_vec);
+}
 
 
 

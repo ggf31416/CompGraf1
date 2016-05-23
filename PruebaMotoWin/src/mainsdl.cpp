@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -12,7 +11,9 @@
 
 #include "camera.h"
 #include "Model.h"
+
 #include "Fisica/ManejadorFisica.h"
+
 
 #define SCREEN_WIDTH  256
 #define SCREEN_HEIGHT 256
@@ -20,6 +21,41 @@
 
 #define TRUE  1
 #define FALSE 0
+
+#define V0 -0.5,-0.5,-0.5
+#define V1 0.5,-0.5,-0.5
+#define V2 0.5,1.5,-0.5
+#define V3 -0.5,0.5,-0.5
+#define V4 -0.5,-0.5,0.5
+#define V5 0.5,-0.5,0.5
+#define V6 0.5,1.5,0.5
+#define V7 -0.5,0.5,0.5
+
+#define DRAW_QUAD(P1,P2,P3,P4) glBegin(GL_QUADS);\
+                                glVertex3f(P1);\
+                                glVertex3f(P2);\
+                                glVertex3f(P3);\
+                                glVertex3f(P4);\
+                        glEnd()
+
+
+
+#define f3Tof(v) v.x,v.y,v.z
+
+#define DRAW_QUAD2(P1,P2,P3,P4) glBegin(GL_QUADS);\
+                                glVertex3f(f3Tof(P1));\
+                                glVertex3f(f3Tof(P2));\
+                                glVertex3f(f3Tof(P3));\
+                                glVertex3f(f3Tof(P4));\
+                        glEnd()
+
+#define FRONT_QUAD DRAW_QUAD(V4,V5,V6,V7)
+#define RIGHT_QUAD DRAW_QUAD(V1,V2,V6,V5)
+#define BOTTOM_QUAD DRAW_QUAD(V0,V1,V5,V4)
+#define BACK_QUAD DRAW_QUAD(V0,V3,V2,V1)
+#define LEFT_QUAD DRAW_QUAD(V0,V4,V7,V3)
+#define TOP_QUAD DRAW_QUAD(V2,V3,V7,V6)
+
 
 using namespace std;
 
@@ -40,6 +76,39 @@ void quit(int ret)
 
 
 struct cam_t cam;
+
+
+
+void dibujaRampa(float x_base, float y_base, float x_size,  float z_size, float altura_x_min, float altura_x_max){
+	float z_base = - z_size / 2;
+	math::float3 v0(x_base,y_base,z_base);
+	math::float3 v1 = v0 + float3(x_size,0,0);
+	math::float3 v2 = v1 + float3(0,altura_x_max,0);
+	math::float3 v3 = v0 + float3(0,altura_x_min,0);
+	math::float3 v4 = v0 + float3(0,0,z_size);
+	math::float3 v5 = v4 + float3(x_size,0,0);
+	math::float3 v6 = v2 + float3(0,0,z_size);
+	math::float3 v7 = v0 + float3(0,altura_x_min,z_size);
+
+	 glColor3f(   0.0f,  1.0f,  0.0f ); /* Set The Color To Green           */
+	DRAW_QUAD2(v4,v5,v6,v7); // front
+
+	glColor3f(   1.0f,  0.5f,  0.0f ); /* Set The Color To Orange          */
+	DRAW_QUAD2(v1,v2,v6,v5); // right
+
+	glColor3f(   1.0f,  0.0f,  0.0f ); /* Set The Color To Red             */
+	DRAW_QUAD2(v0,v1,v5,v4); // bottom
+
+	glColor3f(   1.0f,  1.0f,  0.0f ); /* Set The Color To Yellow          */
+	DRAW_QUAD2(v0,v3,v2,v1); // back
+
+	glColor3f(   0.0f,  0.0f,  1.0f ); /* Set The Color To Blue            */
+	DRAW_QUAD2(v0,v4,v7,v3); //left
+
+	glColor3f(   1.0f,  0.0f,  1.0f ); /* Set The Color To Violet          */
+	DRAW_QUAD2(v2,v3,v7,v6); // top
+
+}
 
 void draw_wall(GLfloat size, GLint x_lines, GLint z_lines)
 {
@@ -103,27 +172,47 @@ void handle_key_press(SDL_keysym * keysym)
 }
 
 
+void dibujarRampas(){
+	dibujaRampa(-0.5,-0.5,1,1,1,2);
+	dibujaRampa(2,-0.5,1,1,1,2);
+	dibujaRampa(4,-0.5,1,1,1,2);
+}
 
-static GLfloat vertices[] = {
-          -0.25, -3.0, -0.25, // 0
-           0.25, -3.0, -0.25, // 1
-           0.25,  3.0, -0.25, // 2
-          -0.25,  3.0, -0.25, // 3
-          -0.25, -3.0,  0.25, // 4
-           0.25, -3.0,  0.25, // 5
-           0.25,  1.0,  0.25, // 6
-          -0.25,  1.0,  0.25, // 7
-  };
-
-  static GLubyte front_indices[] = {4, 5, 6, 7};
-  static GLubyte right_indices[] = {1, 2, 6, 5};
-  static GLubyte bottom_indices[] = {0, 1, 5, 4};
-  static GLubyte back_indices[] = {0, 3, 2, 1};
-  static GLubyte left_indices[] = {0, 4, 7, 3};
-  static GLubyte top_indices[] = {2, 3, 7, 6};
+void draw_ramp(void)
+{
+        glColor3f(   0.0f,  1.0f,  0.0f ); /* Set The Color To Green           */
+        FRONT_QUAD;
+        glColor3f(   1.0f,  0.5f,  0.0f ); /* Set The Color To Orange          */
+        RIGHT_QUAD;
+        glColor3f(   1.0f,  0.0f,  0.0f ); /* Set The Color To Red             */
+        BOTTOM_QUAD;
+        glColor3f(   1.0f,  1.0f,  0.0f ); /* Set The Color To Yellow          */
+        BACK_QUAD;
+        glColor3f(   0.0f,  0.0f,  1.0f ); /* Set The Color To Blue            */
+        LEFT_QUAD;
+        glColor3f(   1.0f,  0.0f,  1.0f ); /* Set The Color To Violet          */
+        TOP_QUAD;
+}
 
 
 void mostrarObstaculo(){
+    static GLfloat vertices[] = {
+              -0.25, -3.0, -0.25, // 0
+               0.25, -3.0, -0.25, // 1
+               0.25,  3.0, -0.25, // 2
+              -0.25,  3.0, -0.25, // 3
+              -0.25, -3.0,  0.25, // 4
+               0.25, -3.0,  0.25, // 5
+               0.25,  1.0,  0.25, // 6
+              -0.25,  1.0,  0.25, // 7
+      };
+
+      static GLubyte front_indices[] = {4, 5, 6, 7};
+      static GLubyte right_indices[] = {1, 2, 6, 5};
+      static GLubyte bottom_indices[] = {0, 1, 5, 4};
+      static GLubyte back_indices[] = {0, 3, 2, 1};
+      static GLubyte left_indices[] = {0, 4, 7, 3};
+      static GLubyte top_indices[] = {2, 3, 7, 6};
 
       glEnableClientState(GL_VERTEX_ARRAY);
       glVertexPointer(3, GL_FLOAT, 0, vertices);
@@ -150,25 +239,57 @@ void mostrarObstaculo(){
       //glEndList();
 }
 
+
+
+void setup_pointers(void)
+{
+        static GLfloat vertices[] = {
+                /*0*/   -0.5, -0.5, -0.5,
+                /*1*/    0.5, -0.5, -0.5,
+                /*2*/    0.5,  1.5, -0.5,
+                /*3*/   -0.5,  0.5, -0.5,
+                /*4*/   -0.5, -0.5,  0.5,
+                /*5*/    0.5, -0.5,  0.5,
+                /*6*/    0.5,  1.5,  0.5,
+                /*7*/   -0.5,  0.5,  0.5,
+
+                /*8*/   -1.0, -1.0, -1.0,
+                /*9*/    1.0, -1.0, -1.0,
+                /*10*/   1.0,  1.0, -1.0,
+                /*11*/  -1.0,  1.0, -1.0,
+        };
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer (3, GL_FLOAT, 0, vertices);
+}
+
+
+void ramp_sides(void)
+{
+        static GLubyte front_indices[] = {4, 5, 6, 7};
+        static GLubyte right_indices[] = {1, 2, 6, 5};
+        static GLubyte bottom_indices[] = {0, 1, 5, 4};
+        static GLubyte back_indices[] = {0, 3, 2, 1};
+        static GLubyte left_indices[] = {0, 4, 7, 3};
+        static GLubyte top_indices[] = {2, 3, 7, 6};
+}
+
+
 int init_gl()
 {
-
-
-
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
         glShadeModel(GL_SMOOTH);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
+        setup_pointers();
 
         // check OpenGL error
         GLenum err;
         while ((err = glGetError()) != GL_NO_ERROR) {
             cerr << "OpenGL error: " << err << endl;
         }
-
 
 	return (TRUE);
 }
@@ -230,23 +351,20 @@ int draw_gl_scene()
 		glPushMatrix();
         glTranslatef(0.0, 0.0, 0.0);
         //glCallList(ramp_list);
-        mostrarObstaculo();
+        //mostrarObstaculo();
+        dibujarRampas();
 /*
         glTranslatef(0.0, 0.0, 0.0);
         glScalef(0.25, 0.25, 0.25);
         glCallList(ramp_list);
-
         glTranslatef(0.0, 0.3, 1.0);
         glScalef(1.0, 1.25, 1.0);
         glCallList(ramp_list);
-
         glTranslatef(0.0, 0.25, 1.0);
         glScalef(1.0, 1.25, 1.0);
         glCallList(ramp_list);
-
         glTranslatef(0.0, 1.0, 1.5);
         glCallList(ramp_list);
-
         glTranslatef(0.0, 5.3, 0.0);*/
         //glScalef( 1.0, -0.7, -1.0);
 //        glCallList(ramp_list);
@@ -310,10 +428,14 @@ int draw_gl_scene()
 	return (TRUE);
 }
 
+
 void configurarFisica(){
 	manejador = new ManejadorFisica();
 	manejador->establecerGravedad(0.1);
 }
+
+void onMouseWheelScroll(SDL_Event &event);
+
 
 int main(int argc, char *argv[])
 {
@@ -345,6 +467,9 @@ int main(int argc, char *argv[])
 	GLdouble acelX=0.3,acelY=0.00,desacelX=-0.06,desacelY=-0.00,rozamientoX=-0.05,rozamientoY=-0.00;
 	GLdouble frenoX = -1.0;
 
+
+	int pantallaX = SCREEN_WIDTH;
+	int pantallaY = SCREEN_HEIGHT;
 
 	/* initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
@@ -398,8 +523,9 @@ int main(int argc, char *argv[])
 	trans(cam, create_v3f(0.0, 0.0, 3.0));
 	move_forward(cam,  1.0 );
 
+
 	/* resize the initial window */
-	resize_window(SCREEN_WIDTH, SCREEN_HEIGHT);
+	resize_window(pantallaX, pantallaY);
 
 	//Cargo modelo Assimp (intento varios lados)
 	// nota: inverti el valor de retorno de loadasset, 1 si cargo, 0 si fallo
@@ -407,6 +533,13 @@ int main(int argc, char *argv[])
 	if (!cargo){
 		cout << "Couldn't load model: " << endl;
 	}
+
+
+	 SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
+	 SDL_ShowCursor(1); // 0 para ocultarlo
+	 float angulo_mouse_x = 0;
+	 float angulo_mouse_y = 0;
+
 
 	/* wait for events */
 	while (!done) {
@@ -464,19 +597,55 @@ int main(int argc, char *argv[])
 						SDL_GetError());
 					quit(1);
 				}
+				pantallaX= event.resize.w;
+				pantallaY =  event.resize.h;
 				resize_window(event.resize.w,
 					     event.resize.h);
 				break;
 			case SDL_KEYDOWN:
 				handle_key_press(&event.key.keysym);
 				break;
+			case SDL_MOUSEBUTTONDOWN:
+				if (event.button.button == SDL_BUTTON_LEFT){
+					move_forward(cam,-5 * 60.0f / 1000.0f);
+				}
+				else if (event.button.button == SDL_BUTTON_RIGHT){
+					move_forward(cam,5 * 60.0f / 1000.0f);
+				}
+				break;
+			case SDL_MOUSEMOTION:
+			{
+				// inspirado en http://lazyfoo.net/SDL_tutorials/lesson09/index.php
+				int mouse_x = event.motion.x;
+				int mouse_y = event.motion.y;
+				int mouse_dx = mouse_x - pantallaX / 2;
+				int mouse_dy = mouse_y - pantallaY / 2;
+				if(!(mouse_dx == 0 && mouse_dy == 0)) {
+					float dang_x = -mouse_dx * 5.0f * dt / 1000.0;
+					float dang_y = -mouse_dy * 5.0f * dt / 1000.0;
+
+					angulo_mouse_x += dang_x;
+					rot_y(cam,dang_x,-60,60);
+
+					angulo_mouse_y += dang_y;
+					rot_x(cam,dang_y,-20,20);
+
+				}
+				 SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
+			}
+			break;
+
+
 			case SDL_QUIT:
 				done = TRUE;
 				break;
+
 			default:
 				break;
 			}
 		}
+
+
 
 		//Actualizo segun tiempo transcurrido.
 		//Manejo de moto
@@ -531,6 +700,8 @@ int main(int argc, char *argv[])
 	/* Should never get here */
 	return (0);
 }
+
+
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	char** x = new char*();
