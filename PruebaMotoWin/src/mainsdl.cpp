@@ -77,7 +77,27 @@ void quit(int ret)
 
 struct cam_t cam;
 
+void registrarRampa(float x_base, float y_base, float x_size,  float z_size, float altura_x_min, float altura_x_max){
+	float z_base = - z_size / 2;
+	math::float3 v0(x_base,y_base,z_base);
+	math::float3 v1 = v0 + float3(x_size,0,0);
+	math::float3 v2 = v1 + float3(0,altura_x_max,0);
+	math::float3 v3 = v0 + float3(0,altura_x_min,0);
+	math::float3 v4 = v0 + float3(0,0,z_size);
+	math::float3 v5 = v4 + float3(x_size,0,0);
+	math::float3 v6 = v2 + float3(0,0,z_size);
+	math::float3 v7 = v0 + float3(0,altura_x_min,z_size);
 
+	math::float3 abajo[4] = {v0,v1,v5,v4};
+
+	std::cout << "\n";
+	math::float3 arriba[4] = {v2,v3,v7,v6};
+	for(int i = 0; i < 4; i++){
+			std::cout << i << " " << float3(arriba[i]) << ",";
+	}
+	std::cout << "\n";
+	manejador->registrarRampaConObs(arriba,abajo);
+}
 
 void dibujaRampa(float x_base, float y_base, float x_size,  float z_size, float altura_x_min, float altura_x_max){
 	float z_base = - z_size / 2;
@@ -171,6 +191,11 @@ void handle_key_press(SDL_keysym * keysym)
 	return;
 }
 
+void registrarRampas(){
+	registrarRampa(-0.5,-0.5,1,1,1,2);
+	registrarRampa(2,-0.5,1,1,1,2);
+	registrarRampa(4,-0.5,1,1,1,2);
+}
 
 void dibujarRampas(){
 	dibujaRampa(-0.5,-0.5,1,1,1,2);
@@ -432,9 +457,10 @@ int draw_gl_scene()
 void configurarFisica(){
 	manejador = new ManejadorFisica();
 	manejador->establecerGravedad(0.1);
+	registrarRampas();
 }
 
-void onMouseWheelScroll(SDL_Event &event);
+
 
 
 int main(int argc, char *argv[])
@@ -520,8 +546,8 @@ int main(int argc, char *argv[])
 	/* initialize OpenGL */
 	init_gl();
         init_cam(cam);
-	trans(cam, create_v3f(0.0, 0.0, 3.0));
-	move_forward(cam,  1.0 );
+	//trans(cam, create_v3f(0.0, 0.0, 3.0));
+	//move_forward(cam,  1.0 );
 
 
 	/* resize the initial window */
@@ -533,7 +559,16 @@ int main(int argc, char *argv[])
 	if (!cargo){
 		cout << "Couldn't load model: " << endl;
 	}
+	else
+	{
+	    aiVector3D *min = new aiVector3D(),*max = new aiVector3D();
+	    model2->get_bounding_box(min,max);
+	    float dif_x = max->x - min->x;
+	    std::cout << "Min BB: " << min->x << ", " << min->y << ", " << min->z <<"\n";
+	    std::cout << "Max BB: "<< max->x << ", " << max->y << ", " << max->z <<"\n";
+	    manejador->setTamanio(dif_x,max->y - min->y,max->z - min->z,0,0,1,0);
 
+	}
 
 	 SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
 	 SDL_ShowCursor(1); // 0 para ocultarlo
@@ -572,7 +607,8 @@ int main(int argc, char *argv[])
 		} else if(keystate[SDLK_e]) {
 				rot_z(cam, -5.0);
 		} else if(keystate[SDLK_q]) {
-				rot_z(cam, 5.0);
+			done = TRUE;
+			break;
 		}
 
 		while (SDL_PollEvent(&event)) {
@@ -616,6 +652,8 @@ int main(int argc, char *argv[])
 			case SDL_MOUSEMOTION:
 			{
 
+
+
 			}
 			break;
 
@@ -626,11 +664,14 @@ int main(int argc, char *argv[])
 
 			default:
 				break;
+
 			}
 		}
+
 		// inspirado en http://lazyfoo.net/SDL_tutorials/lesson09/index.php
-		int mouse_x = event.motion.x;
-		int mouse_y = event.motion.y;
+		/*int mouse_x; // event.motion.x;
+		int mouse_y;// = event.motion.y;
+		SDL_GetMouseState(&mouse_x,&mouse_y);
 		int mouse_dx = mouse_x - pantallaX / 2;
 		int mouse_dy = mouse_y - pantallaY / 2;
 		if(!(mouse_dx == 0 && mouse_dy == 0)) {
@@ -638,14 +679,12 @@ int main(int argc, char *argv[])
 			float dang_y = -mouse_dy * 5.0f * dt / 1000.0;
 
 			angulo_mouse_x += dang_x;
-			rot_y(cam,dang_x,-60,60);
+			rot_y(cam,dang_x);//,-60,60);
 
 			angulo_mouse_y += dang_y;
-			rot_x(cam,dang_y,-20,20);
-
-		}
-		 SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
-
+			rot_x(cam,dang_y);//,-20,20);
+			SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
+		}*/
 
 		//Actualizo segun tiempo transcurrido.
 		//Manejo de moto
@@ -686,8 +725,23 @@ int main(int argc, char *argv[])
 			}
 		 }
 
+		 GLdouble oldPosX = model2->posX;
+		 GLdouble oldPosY = model2->posY;
 		 model2->acelerar(acelAuxX,acelAuxY,(GLdouble) dt/1000);
+		 //std::cout << "Pos Moto: " << model2->posX << ", " << model2->posY << "\n";
 
+		 cam.view_dir.x = model2->posX - inicioNivel[0] ;
+		 cam.view_dir.y = model2->posY;
+		 cam.view_dir.z = 0;
+		 cam.pos.x += model2->posX - oldPosX;
+		 cam.pos.y += model2->posY - oldPosY;
+
+		 //render(cam);
+		 	manejador->establecerPosicionMoto(model2->posX-10,model2->posY,0);
+		 	//manejador->simular(dt);
+		 	if (manejador->estaSobrePista()){
+
+		 	}
 		 //Dibujo la escena
 		 if (is_active) {
 			draw_gl_scene();

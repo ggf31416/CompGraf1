@@ -59,6 +59,10 @@ void FisicaMoto::trasladar(float3 vec){
 	this->ruedas[1].transladar(vec);
 }
 
+void FisicaMoto::setPosicion(math::float3 p){
+	this->trasladar(p - this->boundingBox.minPoint);
+}
+
 void FisicaMoto::rotar(float grados,math::float3 centro){
 	Quat q;
 	q.RotateZ(grados);

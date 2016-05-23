@@ -8,7 +8,7 @@
 #ifndef PISTA_H_
 #define PISTA_H_
 
-
+#include "MatGeoLib/Geometry/Plane.h"
 #include "ObjetoFisico.h"
 #include "MatGeoLib/Geometry/AABB.h"
 
@@ -17,7 +17,7 @@ namespace fisica {
 
 class Pista : public ObjetoFisico {
 public:
-
+	math::Plane interno;
 
 	Pista(math::float3 *quad) : ObjetoFisico(){
 		for(int i = 0; i < 4 ; i++){
@@ -25,10 +25,21 @@ public:
 		}
 
 		aabb = math::AABB::MinimalEnclosingAABB(quad,4);
+		interno = math::Plane(quad[0],quad[1],quad[2]);
 	}
 	virtual ~Pista(){
 
 	}
+
+	virtual bool colisiona(FisicaMoto &fm){
+		math::AABB aabb = getAABB();
+		return fm.colisiona(aabb) && fm.colisiona(interno);
+	}
+	virtual bool colisiona(FisicaRueda &fr){
+		math::AABB aabb = getAABB();
+		return fr.colisiona(aabb) && fr.colisiona(interno);
+	}
+
 	virtual bool esObstaculo(){
 		return false;
 	}

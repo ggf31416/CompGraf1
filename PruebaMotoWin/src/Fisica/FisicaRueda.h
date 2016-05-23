@@ -23,6 +23,12 @@ class FisicaRueda{
 		bool colisiona(const math::Triangle &obs) ;
 		void transladar(math::float3 vec);
 
+		bool colisiona(const math::Plane &obs) {
+			return this->boxRueda.Intersects(obs) && this->centroRueda.Distance(obs) < this->radioRueda;
+		}
+		bool colisiona(const math::Polygon &obs) {
+			return this->boxRueda.Intersects(obs);
+		}
 
 		bool usarSoloBox;
 

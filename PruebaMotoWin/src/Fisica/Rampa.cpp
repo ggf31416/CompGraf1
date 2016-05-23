@@ -7,13 +7,19 @@
 
 #include "Rampa.h"
 #include "BoxObstaculo.h"
+#include <iostream>
 
 namespace fisica {
 
 using namespace math;
 
 Rampa::Rampa(float3* superiores,float3 * inferiores) {
-
+	for(int i = 0; i < 4; i++){
+			std::cout << i << " " << float3(superiores[i]) << ",";
+	}
+	for(int i = 0; i < 4; i++){
+			std::cout << i << " " << float3(inferiores[i]) << ",";
+	}
 
 	// TODO Auto-generated constructor stub
 	this->superior[0] = superiores[0];
@@ -35,14 +41,19 @@ Rampa::Rampa(float3* superiores,float3 * inferiores) {
 
 
 	float x_min = Min(inferior[0].x,inferior[1].x,inferior[2].x);
+	std::cout << "x_min" << x_min << "\n";
 	float y_min = Min(inferior[0].y,inferior[1].y,inferior[2].y);
+	std::cout << "y_min" << y_min << "\n";
 	float z_min = Min(inferior[0].z,inferior[1].z,inferior[2].z);
+	std::cout << "z_min" << z_min << "\n";
 
 	float x_max = Max(inferior[0].x,inferior[1].x,inferior[2].x);
+	std::cout << "x_min" << x_max << "\n";
 	float z_max = Max(inferior[0].z,inferior[1].z,inferior[2].z);
+	std::cout << "z_min" << z_max << "\n";
 
-
-	float y_min_s = Min(superior[0].y,superior[2].y);
+	float y_min_s = Min(superior[0].y,superior[1].y,superior[2].y,superior[3].y);
+	std::cout << "y_min_s" << y_min_s << "\n";
 
 	float dif = y_max - y_min_s;
 
@@ -51,9 +62,12 @@ Rampa::Rampa(float3* superiores,float3 * inferiores) {
 	float3 vec_med = float3(x_max,y_min_s,z_max);
 	this->boxInferior = AABB(vec_min,vec_med);
 
-	this->boxTrasero =  AABB(float3(v_alto.x,z_max,y_max),float3(v_alto.x,z_min,y_min_s));
+	this->boxTrasero =  AABB(float3(v_alto.x,y_min,z_min),float3(v_alto.x,y_max,z_max));
 
 	this->pista = new Pista( this->superior);
+
+	std::cout << "inferior: " << this->boxInferior.ToString() << "\n";
+	std::cout << "trasero: " << this->boxTrasero.ToString() << "\n";
 }
 
 void Rampa::generarObjetos(std::vector<ObjetoFisico*> *lista){

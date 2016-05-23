@@ -13,6 +13,7 @@
 #include "ObjetoContainer.h"
 #include "Gravedad.h"
 #include "MatGeoLib/Geometry/KDTree.h"
+#include "FisicaMoto.h"
 #include <vector>
 
 class ManejadorFisica {
@@ -22,6 +23,13 @@ public:
 	ManejadorFisica();
 
 	void registrarRampaConObs(float* arr,  unsigned char* arribaIdx, unsigned char* abajoIdx) ;
+
+	void registrarRampaConObs(math::float3* arriba, math::float3* abajo);
+
+	void setTamanio(float largo,float alto,float profundidad,float y_ruedas,float x_rueda0,float x_rueda1, float radioRueda){
+		fm->setTamanio(largo,alto,profundidad,y_ruedas,x_rueda0,x_rueda1,radioRueda);
+	}
+
 
 	void establecerGravedad(float acelHaciaAbajo);
 

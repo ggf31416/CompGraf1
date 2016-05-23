@@ -6,6 +6,7 @@
  */
 
 #include "ManejadorFisica.h"
+
 #include "Gravedad.h"
 #include <iostream>
 #include "BoxObstaculo.h"
@@ -19,7 +20,7 @@ using namespace fisica;
 ManejadorFisica::ManejadorFisica() {
 	// TODO Auto-generated constructor stub
 	this->objetos = new std::vector<ObjetoFisico*>();
-
+	this->fm = new FisicaMoto();
 
 }
 
@@ -115,6 +116,12 @@ void ManejadorFisica::registrarRampaConObs(float* arr, unsigned char* arribaIdx,
 	r.generarObjetos(this->objetos);
 }
 
+
+void ManejadorFisica::registrarRampaConObs(float3* arriba, float3* abajo) {
+	fisica::Rampa r =  Rampa(arriba,abajo);
+	r.generarObjetos(this->objetos);
+}
+
 void ManejadorFisica::establecerGravedad(float acelHaciaAbajo){
 	this->g.g = -acelHaciaAbajo;
 }
@@ -124,7 +131,8 @@ void ManejadorFisica::registrarMoto(){
 }
 
 void ManejadorFisica::establecerPosicionMoto(float x, float y, float z){
-
+	float3 p(x,y,z);
+	fm->setPosicion(p);
 }
 
 bool ManejadorFisica::estaSobrePista(){

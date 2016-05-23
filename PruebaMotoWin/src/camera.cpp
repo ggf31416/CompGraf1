@@ -91,15 +91,15 @@ GLfloat dot_product_v3f(compg_vector3f v, compg_vector3f u)
 
 void init_cam(struct cam_t & cam)
 {
-	cam.pos = create_v3f(0.0, 0.0, 0.0);
-	cam.view_dir = create_v3f(0.0, 0.0, -1.0);
+	//cam.pos = create_v3f(-5.0, 0.3, 0.0);
+	cam.pos = create_v3f(-11.8, 0.5, 0.5);
+	cam.view_dir = create_v3f(0.0, -1.0, -1.0);
 	cam.right_vec = create_v3f(1.0, 0.0, 0.0);
 	cam.up_vec = create_v3f(0.0, 1.0, 0.0);
         cam.rotated_x = 0.0;
         cam.rotated_y = 0.0;
         cam.rotated_z = 0.0;
 }
-
 
 
 

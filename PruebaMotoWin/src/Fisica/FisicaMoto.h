@@ -29,6 +29,14 @@ public:
 	bool colisiona(const math::AABB &obs) ;
 	bool colisiona(const math::OBB &obs) ;
 	bool colisiona(const math::Triangle &obs) ;
+	bool colisiona(const math::Plane &obs) {
+		return this->boundingBox.Intersects(obs);
+	}
+	bool colisiona(const math::Polygon &obs) {
+		return this->boundingBox.Intersects(obs);
+	}
+
+
 	math::AABB boundingBox;
 private:
 
