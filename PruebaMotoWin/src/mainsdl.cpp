@@ -20,6 +20,30 @@
 #define TRUE  1
 #define FALSE 0
 
+#define V0 -0.5,-0.5,-0.5
+#define V1 0.5,-0.5,-0.5
+#define V2 0.5,1.5,-0.5
+#define V3 -0.5,0.5,-0.5
+#define V4 -0.5,-0.5,0.5
+#define V5 0.5,-0.5,0.5
+#define V6 0.5,1.5,0.5
+#define V7 -0.5,0.5,0.5
+
+#define DRAW_QUAD(P1,P2,P3,P4) glBegin(GL_QUADS);\
+                                glVertex3f(P1);\
+                                glVertex3f(P2);\
+                                glVertex3f(P3);\
+                                glVertex3f(P4);\
+                        glEnd()
+
+#define FRONT_QUAD DRAW_QUAD(V4,V5,V6,V7)
+#define RIGHT_QUAD DRAW_QUAD(V1,V2,V6,V5)
+#define BOTTOM_QUAD DRAW_QUAD(V0,V1,V5,V4)
+#define BACK_QUAD DRAW_QUAD(V0,V3,V2,V1)
+#define LEFT_QUAD DRAW_QUAD(V0,V4,V7,V3)
+#define TOP_QUAD DRAW_QUAD(V2,V3,V7,V6)
+
+
 using namespace std;
 
 model::Model* model2;
@@ -101,6 +125,23 @@ void handle_key_press(SDL_keysym * keysym)
 
 
 
+void draw_ramp(void)
+{
+        glColor3f(   0.0f,  1.0f,  0.0f ); /* Set The Color To Green           */
+        FRONT_QUAD;
+        glColor3f(   1.0f,  0.5f,  0.0f ); /* Set The Color To Orange          */
+        RIGHT_QUAD;
+        glColor3f(   1.0f,  0.0f,  0.0f ); /* Set The Color To Red             */
+        BOTTOM_QUAD;
+        glColor3f(   1.0f,  1.0f,  0.0f ); /* Set The Color To Yellow          */
+        BACK_QUAD;
+        glColor3f(   0.0f,  0.0f,  1.0f ); /* Set The Color To Blue            */
+        LEFT_QUAD;
+        glColor3f(   1.0f,  0.0f,  1.0f ); /* Set The Color To Violet          */
+        TOP_QUAD;
+}
+
+
 void mostrarObstaculo(){
     static GLfloat vertices[] = {
               -0.25, -3.0, -0.25, // 0
@@ -145,25 +186,57 @@ void mostrarObstaculo(){
       //glEndList();
 }
 
+
+
+void setup_pointers(void)
+{
+        static GLfloat vertices[] = {
+                /*0*/   -0.5, -0.5, -0.5,
+                /*1*/    0.5, -0.5, -0.5,
+                /*2*/    0.5,  1.5, -0.5,
+                /*3*/   -0.5,  0.5, -0.5,
+                /*4*/   -0.5, -0.5,  0.5,
+                /*5*/    0.5, -0.5,  0.5,
+                /*6*/    0.5,  1.5,  0.5,
+                /*7*/   -0.5,  0.5,  0.5,
+
+                /*8*/   -1.0, -1.0, -1.0,
+                /*9*/    1.0, -1.0, -1.0,
+                /*10*/   1.0,  1.0, -1.0,
+                /*11*/  -1.0,  1.0, -1.0,
+        };
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer (3, GL_FLOAT, 0, vertices);
+}
+
+
+void ramp_sides(void)
+{
+        static GLubyte front_indices[] = {4, 5, 6, 7};
+        static GLubyte right_indices[] = {1, 2, 6, 5};
+        static GLubyte bottom_indices[] = {0, 1, 5, 4};
+        static GLubyte back_indices[] = {0, 3, 2, 1};
+        static GLubyte left_indices[] = {0, 4, 7, 3};
+        static GLubyte top_indices[] = {2, 3, 7, 6};
+}
+
+
 int init_gl()
 {
-
-
-
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
         glShadeModel(GL_SMOOTH);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
+        setup_pointers();
 
         // check OpenGL error
         GLenum err;
         while ((err = glGetError()) != GL_NO_ERROR) {
             cerr << "OpenGL error: " << err << endl;
         }
-
 
 	return (TRUE);
 }
@@ -225,7 +298,8 @@ int draw_gl_scene()
 		glPushMatrix();
         glTranslatef(0.0, 0.0, 0.0);
         //glCallList(ramp_list);
-        mostrarObstaculo();
+        //mostrarObstaculo();
+        draw_ramp();
 /*
         glTranslatef(0.0, 0.0, 0.0);
         glScalef(0.25, 0.25, 0.25);
