@@ -615,23 +615,7 @@ int main(int argc, char *argv[])
 				break;
 			case SDL_MOUSEMOTION:
 			{
-				// inspirado en http://lazyfoo.net/SDL_tutorials/lesson09/index.php
-				int mouse_x = event.motion.x;
-				int mouse_y = event.motion.y;
-				int mouse_dx = mouse_x - pantallaX / 2;
-				int mouse_dy = mouse_y - pantallaY / 2;
-				if(!(mouse_dx == 0 && mouse_dy == 0)) {
-					float dang_x = -mouse_dx * 5.0f * dt / 1000.0;
-					float dang_y = -mouse_dy * 5.0f * dt / 1000.0;
 
-					angulo_mouse_x += dang_x;
-					rot_y(cam,dang_x,-60,60);
-
-					angulo_mouse_y += dang_y;
-					rot_x(cam,dang_y,-20,20);
-
-				}
-				 SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
 			}
 			break;
 
@@ -644,7 +628,23 @@ int main(int argc, char *argv[])
 				break;
 			}
 		}
+		// inspirado en http://lazyfoo.net/SDL_tutorials/lesson09/index.php
+		int mouse_x = event.motion.x;
+		int mouse_y = event.motion.y;
+		int mouse_dx = mouse_x - pantallaX / 2;
+		int mouse_dy = mouse_y - pantallaY / 2;
+		if(!(mouse_dx == 0 && mouse_dy == 0)) {
+			float dang_x = -mouse_dx * 5.0f * dt / 1000.0;
+			float dang_y = -mouse_dy * 5.0f * dt / 1000.0;
 
+			angulo_mouse_x += dang_x;
+			rot_y(cam,dang_x,-60,60);
+
+			angulo_mouse_y += dang_y;
+			rot_x(cam,dang_y,-20,20);
+
+		}
+		 SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
 
 
 		//Actualizo segun tiempo transcurrido.
