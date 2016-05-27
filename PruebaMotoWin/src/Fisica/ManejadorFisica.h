@@ -9,6 +9,7 @@
 #define MANEJADORFISICA_H_
 
 #include "Rampa.h"
+#include "Pista.h"
 #include "ObjetoFisico.h"
 #include "ObjetoContainer.h"
 #include "Gravedad.h"
@@ -49,7 +50,9 @@ public:
 
 	virtual ~ManejadorFisica();
 
-	bool colisiono = false;
+	bool colisiono;
+	bool sobrePista;
+	float getAltura();
 
 private:
 	//math::KdTree<AABB> arbol;
@@ -59,7 +62,10 @@ private:
 	FisicaMoto* fm;
 	Gravedad g;
 
-	bool sobrePista;
+
+
+
+	fisica::Pista* pistaActual;
 
 };
 

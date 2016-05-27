@@ -17,15 +17,14 @@ namespace fisica {
 
 class Pista : public ObjetoFisico {
 public:
-	math::Plane interno;
+	math::Plane plano;
 
 	Pista(math::float3 *quad) : ObjetoFisico(){
 		for(int i = 0; i < 4 ; i++){
 			this->puntos[i] = quad[i];
 		}
-
 		aabb = math::AABB::MinimalEnclosingAABB(quad,4);
-		interno = math::Plane(quad[0],quad[1],quad[2]);
+		plano = math::Plane(quad[0],quad[1],quad[2]);
 	}
 	virtual ~Pista(){
 
@@ -33,11 +32,11 @@ public:
 
 	virtual bool colisiona(FisicaMoto &fm){
 		math::AABB aabb = getAABB();
-		return fm.colisiona(aabb) && fm.colisiona(interno);
+		return fm.colisiona(aabb) && fm.colisiona(plano);
 	}
 	virtual bool colisiona(FisicaRueda &fr){
 		math::AABB aabb = getAABB();
-		return fr.colisiona(aabb) && fr.colisiona(interno);
+		return fr.colisiona(aabb) && fr.colisiona(plano);
 	}
 
 	virtual bool esObstaculo(){

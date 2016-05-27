@@ -488,7 +488,7 @@ int main(int argc, char *argv[])
 	//Rozamiento es una "aceleracion negativa";
 	//Angulo es la inclinacion de la moto respecto a la rueda trasera
 	//Desacel es lo que desacelera la moto
-	GLdouble acelX=0.3,acelY=0.00,desacelX=-0.06,desacelY=-0.00,rozamientoX=-0.05,rozamientoY=-0.00;
+	GLdouble acelX=0.3,acelY=0.00,desacelX=-0.1,desacelY=-0.00,rozamientoX=-0.05,rozamientoY=-0.00;
 	GLdouble frenoX = -1.0;
 
 
@@ -565,14 +565,12 @@ int main(int argc, char *argv[])
 	    std::cout << "Min BB: " << min->x << ", " << min->y << ", " << min->z <<"\n";
 	    std::cout << "Max BB: "<< max->x << ", " << max->y << ", " << max->z <<"\n";
 	    manejador->setTamanio(dif_x,max->y - min->y,max->z - min->z,0,0,1,0);
-	    manejador->establecerPosicionMoto(inicioNivel[0],0,0);
+	    manejador->establecerPosicionMoto(inicioNivel[0] - dif_x / 2,0,0);
 
 	}
 
 	 SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
 	 SDL_ShowCursor(1); // 0 para ocultarlo
-	 float angulo_mouse_x = 0;
-	 float angulo_mouse_y = 0;
 
 
 	/* wait for events */
@@ -583,14 +581,18 @@ int main(int argc, char *argv[])
 		/* handle the events in the queue */
 		Uint8* keystate = SDL_GetKeyState(NULL);
 		//continuous-response keys
-		if(keystate[SDLK_g]) {
-				rot_y(cam, 5.0);
+		if(keystate[SDLK_i]) {
+				rot_y(cam, 3.0);
+				std::cout << "cam.y_r=" << cam.rotated_y<< "\n";
+		} else if(keystate[SDLK_m]) {
+				rot_y(cam, -3.0);
+				std::cout << "cam.y_r=" << cam.rotated_y << "\n";
 		} else if(keystate[SDLK_j]) {
-				rot_y(cam, -5.0);
-		} else if(keystate[SDLK_y]) {
-				rot_x(cam, 5.0);
-		} else if(keystate[SDLK_h]) {
-				rot_x(cam, -5.0);
+				rot_x(cam, -3.0);
+				std::cout << "cam.x_r=" << cam.rotated_x << "\n";
+		} else if(keystate[SDLK_k]) {
+				rot_x(cam, 3.0);
+				std::cout << "cam.x_r=" << cam.rotated_x << "\n";
 		} else if(keystate[SDLK_w]) {
 				move_forward(cam,  -0.1 ) ;
 		} else if(keystate[SDLK_a]) {
@@ -605,7 +607,14 @@ int main(int argc, char *argv[])
 				move_up(cam, 0.3);
 		} else if(keystate[SDLK_e]) {
 				rot_z(cam, -5.0);
-		} else if(keystate[SDLK_q]) {
+		}
+		else if(keystate[SDLK_z]) {
+			model2->posY += 0.1;
+		}
+		else if(keystate[SDLK_x]) {
+			model2->posY -= 0.1;
+		}
+		else if(keystate[SDLK_q]) {
 			done = TRUE;
 			break;
 		}
@@ -642,16 +651,31 @@ int main(int argc, char *argv[])
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				if (event.button.button == SDL_BUTTON_LEFT){
-					move_forward(cam,-5 * 60.0f / 1000.0f);
+					//move_forward(cam,-5 * 60.0f / 1000.0f);
+					cam.radio -= 5 * 60.0f / 1000.0f;
 				}
 				else if (event.button.button == SDL_BUTTON_RIGHT){
-					move_forward(cam,5 * 60.0f / 1000.0f);
+					cam.radio += 5 * 60.0f / 1000.0f;
+					//move_forward(cam,5 * 60.0f / 1000.0f);
 				}
 				break;
 			case SDL_MOUSEMOTION:
 			{
+				// inspirado en http://lazyfoo.net/SDL_tutorials/lesson09/index.php
+				int mouse_x; // event.motion.x;
+				int mouse_y;// = event.motion.y;
+				SDL_GetMouseState(&mouse_x,&mouse_y);
+				int mouse_dx = mouse_x - pantallaX / 2;
+				int mouse_dy = mouse_y - pantallaY / 2;
+				if(!(mouse_dx == 0 && mouse_dy == 0)) {
+					float dang_x = -mouse_dx * 3.0f * dt / 1000.0;
+					float dang_y = -mouse_dy * 3.0f * dt / 1000.0;
 
+					rot_x(cam,dang_x);
 
+					rot_y(cam,dang_y,-15,60);
+					SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
+				}
 
 			}
 			break;
@@ -667,23 +691,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		// inspirado en http://lazyfoo.net/SDL_tutorials/lesson09/index.php
-		/*int mouse_x; // event.motion.x;
-		int mouse_y;// = event.motion.y;
-		SDL_GetMouseState(&mouse_x,&mouse_y);
-		int mouse_dx = mouse_x - pantallaX / 2;
-		int mouse_dy = mouse_y - pantallaY / 2;
-		if(!(mouse_dx == 0 && mouse_dy == 0)) {
-			float dang_x = -mouse_dx * 5.0f * dt / 1000.0;
-			float dang_y = -mouse_dy * 5.0f * dt / 1000.0;
 
-			angulo_mouse_x += dang_x;
-			rot_y(cam,dang_x);//,-60,60);
-
-			angulo_mouse_y += dang_y;
-			rot_x(cam,dang_y);//,-20,20);
-			SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
-		}*/
 
 		//Actualizo segun tiempo transcurrido.
 		//Manejo de moto
@@ -729,20 +737,23 @@ int main(int argc, char *argv[])
 		 model2->acelerar(acelAuxX,acelAuxY,(GLdouble) dt/1000);
 		 //std::cout << "Pos Moto: " << model2->posX << ", " << model2->posY << "\n";
 
-		 cam.view_dir.x = model2->posX - inicioNivel[0] ;
-		 cam.view_dir.y = model2->posY;
+		 cam.view_dir.x = model2->posX + inicioNivel[0] + 0.5;
+		 cam.view_dir.y = model2->posY + 0.5;
 		 cam.view_dir.z = 0;
-		 cam.pos.x += model2->posX - oldPosX;
+		 /*cam.pos.x += model2->posX - oldPosX;
 		 cam.pos.y += model2->posY - oldPosY;
+		 cam.pos.z = 3;*/
 
 		 //render(cam);
 		 	manejador->establecerPosicionMoto(model2->posX-10,model2->posY,0);
 		 	manejador->simular(dt);
-		 	if (manejador->colisiono){
+		 	if (manejador->colisiono && model2->velX > 0){
 		 		model2->velX = 0;
 		 		//model2->posX -= 0.1;
 		 		cout << "Colisiono!!!" << "\n";
-
+		 	}
+		 	else if (manejador->sobrePista){
+		 		model2->posY = manejador->getAltura();
 		 	}
 		 //Dibujo la escena
 		 if (is_active) {

@@ -92,13 +92,14 @@ GLfloat dot_product_v3f(compg_vector3f v, compg_vector3f u)
 void init_cam(struct cam_t & cam)
 {
 	//cam.pos = create_v3f(-5.0, 0.3, 0.0);
-	cam.pos = create_v3f(-11.8, 0.5, 0.5);
-	cam.view_dir = create_v3f(0.0, -1.0, -1.0);
+	cam.pos = create_v3f(-1, 0.5, 1);
+	cam.view_dir = create_v3f(-10, 0.3,-1.0);
 	cam.right_vec = create_v3f(1.0, 0.0, 0.0);
 	cam.up_vec = create_v3f(0.0, 1.0, 0.0);
         cam.rotated_x = 0.0;
-        cam.rotated_y = 0.0;
+        cam.rotated_y = 10.0;
         cam.rotated_z = 0.0;
+        cam.radio = 1.5;
 }
 
 
@@ -115,10 +116,10 @@ void trans(struct cam_t & cam, compg_vector3f dir)
 void rot_x(struct cam_t & cam, GLfloat angle)
 {
 	cam.rotated_x += angle;
-        compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
+        /*compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
         compg_vector3f vright = mul_scalar(cam.up_vec, sin(angle*PIdiv180));
         compg_vector3f view = add_v3f(vleft, vright);
-	cam.view_dir = normalize_v3f(view);
+	cam.view_dir = normalize_v3f(view);*/
 }
 
 void rot_x(struct cam_t & cam, GLfloat angle, GLfloat min, GLfloat max)
@@ -126,11 +127,11 @@ void rot_x(struct cam_t & cam, GLfloat angle, GLfloat min, GLfloat max)
 	if (cam.rotated_x + angle < min) angle = cam.rotated_x - min;
 	if (cam.rotated_x + angle > max) angle = max - cam.rotated_x;
 	cam.rotated_x += angle;
-        compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
+    /*    compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
         compg_vector3f vright = mul_scalar(cam.up_vec, sin(angle*PIdiv180));
         compg_vector3f view = add_v3f(vleft, vright);
 	cam.view_dir = normalize_v3f(view);
-	cam.up_vec = mul_scalar(cross_product_v3f(&cam.view_dir, &cam.right_vec), -1);
+	cam.up_vec = mul_scalar(cross_product_v3f(&cam.view_dir, &cam.right_vec), -1);*/
 }
 
 void rot_y(struct cam_t & cam, GLfloat angle, GLfloat min, GLfloat max)
@@ -139,11 +140,11 @@ void rot_y(struct cam_t & cam, GLfloat angle, GLfloat min, GLfloat max)
 	if (cam.rotated_y + angle < min) angle = cam.rotated_y - min;
 	if (cam.rotated_y + angle > max) angle = max - cam.rotated_y;
 	cam.rotated_y += angle;
-        compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
+    /*    compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
         compg_vector3f vright = mul_scalar(cam.right_vec, sin(angle*PIdiv180));
         compg_vector3f view = sub_v3f(vleft, vright);
 	cam.view_dir = normalize_v3f(view);
-	cam.right_vec = cross_product_v3f(&cam.view_dir, &cam.up_vec);
+	cam.right_vec = cross_product_v3f(&cam.view_dir, &cam.up_vec);*/
 }
 
 
@@ -151,11 +152,11 @@ void rot_y(struct cam_t & cam, GLfloat angle, GLfloat min, GLfloat max)
 void rot_y(struct cam_t & cam, GLfloat angle)
 {
 	cam.rotated_y += angle;
-        compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
+        /*compg_vector3f vleft = mul_scalar(cam.view_dir, cos(angle*PIdiv180));
         compg_vector3f vright = mul_scalar(cam.right_vec, sin(angle*PIdiv180));
         compg_vector3f view = sub_v3f(vleft, vright);
 	cam.view_dir = normalize_v3f(view);
-	cam.right_vec = cross_product_v3f(&cam.view_dir, &cam.up_vec);
+	cam.right_vec = cross_product_v3f(&cam.view_dir, &cam.up_vec);*/
 }
 
 
@@ -176,9 +177,13 @@ void rot_z(struct cam_t & cam, GLfloat angle)
 
 void render(struct cam_t cam)
 {
+	cam.pos.x = -cam.radio * cos(cam.rotated_y * PIdiv180) * cos(cam.rotated_x * PIdiv180);
+	cam.pos.y = cam.radio * sin(cam.rotated_y * PIdiv180);
+	cam.pos.z = cam.radio * cos(cam.rotated_y * PIdiv180) * sin(cam.rotated_x * PIdiv180);
 	compg_vector3f ViewPoint = add_v3f(cam.pos, cam.view_dir);
-	gluLookAt(cam.pos.x, cam.pos.y, cam.pos.z,
-                        ViewPoint.x, ViewPoint.y, ViewPoint.z,
+	// ViewPoint = add_v3f(ViewPoint, cam.view_dir);
+	gluLookAt(ViewPoint.x, ViewPoint.y, ViewPoint.z,
+                        cam.view_dir.x, cam.view_dir.y, cam.view_dir.z,
                         cam.up_vec.x, cam.up_vec.y, cam.up_vec.z);
 }
 

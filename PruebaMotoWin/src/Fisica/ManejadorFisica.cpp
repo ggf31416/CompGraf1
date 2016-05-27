@@ -16,12 +16,16 @@ using namespace math;
 using namespace fisica;
 
 
+void checkearCalcY();
 
 ManejadorFisica::ManejadorFisica() {
 	// TODO Auto-generated constructor stub
 	this->objetos = new std::vector<ObjetoFisico*>();
 	this->fm = new FisicaMoto();
-
+	this->colisiono = false;
+	this->sobrePista =false;
+	this->pistaActual = 0;
+	checkearCalcY();
 }
 
 void ManejadorFisica::detectarColision(AABB q,std::vector<fisica::ObjetoFisico*>& lst){
@@ -29,8 +33,8 @@ void ManejadorFisica::detectarColision(AABB q,std::vector<fisica::ObjetoFisico*>
 
 		ObjetoFisico* o = (*(this->objetos))[i];
 		if (o->Intersects(q)){
-			std::cout << "q=" << q<< "\n";
-			std::cout << "Intersects q: " << o->BoundingAABB() << "\n";
+			//std::cout << "q=" << q<< "\n";
+			//std::cout << "Intersects q: " << o->BoundingAABB() << "\n";
 			lst.push_back(o);
 		}
 	}
@@ -71,12 +75,13 @@ void ManejadorFisica::detectarColisionMoto(){
 
 		ObjetoFisico* obj = tmp[i];
 		if (obj->colisiona(*fm)){
-			std::cout << "BBox obj: " << obj->BoundingAABB() << "\n";
+			//std::cout << "BBox obj: " << obj->BoundingAABB() << "\n";
 			if (!obj->esObstaculo()){
 				sobrePista = true;
 				Pista* pista = dynamic_cast<Pista*>(obj);
 				if (pista){
 					float3 acelg = acelPendientePista(pista,this->g);
+					this->pistaActual =pista;
 				}
 			}
 			else{
@@ -155,3 +160,99 @@ void ManejadorFisica::simular(float dt){
 }
 
 
+
+
+// calcular altura de un punto dentro de un triangulo
+// http://stackoverflow.com/questions/5507762/how-to-find-z-by-arbitrary-x-y-coordinates-within-triangle-if-you-have-triangle
+float calcY(Triangle t, float x, float z) {
+		vec p1 = t.a;
+		vec p2 = t.b;
+		vec p3 = t.c;
+        float det = (p2.z - p3.z) * (p1.x - p3.x) + (p3.x - p2.x) * (p1.z - p3.z);
+
+        float l1 = ((p2.z - p3.z) * (x - p3.x) + (p3.x - p2.x) * (z - p3.z)) / det;
+        float l2 = ((p3.z - p1.z) * (x - p3.x) + (p1.x - p3.x) * (z - p3.z)) / det;
+        float l3 = 1.0f - l1 - l2;
+
+        return l1 * p1.y + l2 * p2.y + l3 * p3.y;
+}
+
+// altura a partir de 3 puntos del plano
+float calcY(float3 p1, float3 p2, float3 p3, float x, float z){
+	float3 v1 = p2 - p1;
+	float3 v2 = p3 - p1;
+	float3 abc = v1.Cross(v2);
+	float d = -abc.Dot(p1);// -(abc.x * p1.x + abc.y * p1.y + abc.z * p1.z);
+	// Ax + By + Cz = -D
+	// y = (-D - Ax - Cz) / B
+	float y = (-d - abc.x * x - abc.z * z) / abc.y;
+	return y;
+}
+
+// altura a partir de 3 puntos del plano
+float calcY(const math::Plane& plano, float x, float z){
+	float3 abc = plano.normal;
+	float d = plano.d;
+	// Ax + By + Cz = d
+	// y = (d - Ax - Cz) / B
+	float y = (d - abc.x * x - abc.z * z) / abc.y;
+	return y;
+}
+
+void checkearCalcY(){
+	float3 p1(1,1,1);
+	float3 p2(3,7,1);
+	float3 p3(3,7,-1);
+	float x = 2;
+	float z = 0;
+	float altT, altP,alt3;
+	altT= calcY(Triangle(p1,p2,p3),x,z);
+	altP = calcY(Plane(p1,p2,p3),x,z);
+	alt3 = calcY(p1,p2,p3,x,z);
+	std::cout << "CalcY (" << x << "," << z << ") (y = 4):" << "\n";
+	std::cout << "Altura x Triangulo: " << altT << "\n";
+	std::cout << "Altura x Plano: " << altP << "\n";
+	std::cout << "Altura x 3 puntos: " << alt3 << "\n";
+	std::cout << "-----------------------------\n";
+
+	altT= calcY(Triangle(p1,p2,p3),1,z);
+	altP = calcY(Plane(p1,p2,p3),1,z);
+	alt3 = calcY(p1,p2,p3,1,z);
+	std::cout << "CalcY (" << 1 << "," << z << ") (y = 1):" << "\n";
+	std::cout << "Altura x Triangulo: " << altT << "\n";
+	std::cout << "Altura x Plano: " << altP << "\n";
+	std::cout << "Altura x 3 puntos: " << alt3 << "\n";
+	std::cout << "-----------------------------\n";
+
+	altT= calcY(Triangle(p1,p2,p3),3,0);
+	altP = calcY(Plane(p1,p2,p3),3,0);
+	alt3 = calcY(p1,p2,p3,3,0);
+	std::cout << "CalcY (" << 3 << "," << 0 << ") (y = 7):" << "\n";
+	std::cout << "Altura x Triangulo: " << altT << "\n";
+	std::cout << "Altura x Plano: " << altP << "\n";
+	std::cout << "Altura x 3 puntos: " << alt3 << "\n";
+	std::cout << "-----------------------------\n";
+
+	altT= calcY(Triangle(p1,p2,p3),5,0);
+	altP = calcY(Plane(p1,p2,p3),5,0);
+	alt3 = calcY(p1,p2,p3,5,0);
+	std::cout << "CalcY (" << 5 << "," << 0 << ") (y = 13):" << "\n";
+	std::cout << "Altura x Triangulo: " << altT << "\n";
+	std::cout << "Altura x Plano: " << altP << "\n";
+	std::cout << "Altura x 3 puntos: " << alt3 << "\n";
+	std::cout << "-----------------------------\n";
+
+
+}
+
+float ManejadorFisica::getAltura(){
+	if (this->estaSobrePista()){
+		float x = fm->boundingBox.minPoint.x;
+		float z = fm->boundingBox.minPoint.z;
+		math::Plane pl = this->pistaActual->plano;
+		return calcY(pl,x,z);
+	}
+	else{
+		return fm->boundingBox.minPoint.y;
+	}
+}

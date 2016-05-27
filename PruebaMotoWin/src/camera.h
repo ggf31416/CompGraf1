@@ -24,6 +24,9 @@ struct cam_t {
 	GLfloat rotated_y;	
 	GLfloat rotated_z;	
 
+	compg_vector3f centro;
+	GLfloat radio;
+
 };
 
 void init_cam(struct cam_t & cam);

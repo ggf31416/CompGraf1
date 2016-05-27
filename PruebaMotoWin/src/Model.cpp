@@ -168,6 +168,7 @@ void Model::recursive_render (const aiScene *sc, const aiNode* nd)
 {
 
 
+
 	unsigned int i;
 	unsigned int n = 0, t;
 	aiMatrix4x4 m = nd->mTransformation;
