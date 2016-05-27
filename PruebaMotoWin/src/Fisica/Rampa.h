@@ -22,8 +22,8 @@ public:
 	Pista getPista();
 	void generarObjetos(std::vector<ObjetoFisico*> *lista);
 private:
-	math::float3 superior[];
-	math::float3 inferior[];
+	math::float3 superior[4];
+	math::float3 inferior[4];
 	math::AABB boxInferior;
 	math::AABB boxTrasero;
 	Pista* pista;

@@ -40,7 +40,6 @@ public:
 	math::AABB boundingBox;
 private:
 
-	math::OBB boxMayor;
 	math::OBB boxSuperior;
 	math::float3 ejes[];
 	FisicaRueda* ruedas;

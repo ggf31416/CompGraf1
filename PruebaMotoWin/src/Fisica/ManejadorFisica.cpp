@@ -26,8 +26,11 @@ ManejadorFisica::ManejadorFisica() {
 
 void ManejadorFisica::detectarColision(AABB q,std::vector<fisica::ObjetoFisico*>& lst){
 	for(unsigned int i = 0; i  < this->objetos->size(); i++){
+
 		ObjetoFisico* o = (*(this->objetos))[i];
 		if (o->Intersects(q)){
+			std::cout << "q=" << q<< "\n";
+			std::cout << "Intersects q: " << o->BoundingAABB() << "\n";
 			lst.push_back(o);
 		}
 	}
@@ -63,9 +66,12 @@ void ManejadorFisica::detectarColisionMoto(){
 	std::vector<fisica::ObjetoFisico*> tmp;
 	detectarColision(fm->boundingBox,tmp);
 	sobrePista =false;
+	colisiono = false;
 	for(unsigned int i = 0; i < tmp.size(); i++){
+
 		ObjetoFisico* obj = tmp[i];
 		if (obj->colisiona(*fm)){
+			std::cout << "BBox obj: " << obj->BoundingAABB() << "\n";
 			if (!obj->esObstaculo()){
 				sobrePista = true;
 				Pista* pista = dynamic_cast<Pista*>(obj);
@@ -73,7 +79,11 @@ void ManejadorFisica::detectarColisionMoto(){
 					float3 acelg = acelPendientePista(pista,this->g);
 				}
 			}
+			else{
+				colisiono = true;
+			}
 		}
+		colisiono &= !sobrePista;
 	}
 }
 

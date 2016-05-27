@@ -92,9 +92,7 @@ void registrarRampa(float x_base, float y_base, float x_size,  float z_size, flo
 
 	std::cout << "\n";
 	math::float3 arriba[4] = {v2,v3,v7,v6};
-	for(int i = 0; i < 4; i++){
-			std::cout << i << " " << float3(arriba[i]) << ",";
-	}
+
 	std::cout << "\n";
 	manejador->registrarRampaConObs(arriba,abajo);
 }
@@ -567,6 +565,7 @@ int main(int argc, char *argv[])
 	    std::cout << "Min BB: " << min->x << ", " << min->y << ", " << min->z <<"\n";
 	    std::cout << "Max BB: "<< max->x << ", " << max->y << ", " << max->z <<"\n";
 	    manejador->setTamanio(dif_x,max->y - min->y,max->z - min->z,0,0,1,0);
+	    manejador->establecerPosicionMoto(inicioNivel[0],0,0);
 
 	}
 
@@ -738,8 +737,11 @@ int main(int argc, char *argv[])
 
 		 //render(cam);
 		 	manejador->establecerPosicionMoto(model2->posX-10,model2->posY,0);
-		 	//manejador->simular(dt);
-		 	if (manejador->estaSobrePista()){
+		 	manejador->simular(dt);
+		 	if (manejador->colisiono){
+		 		model2->velX = 0;
+		 		//model2->posX -= 0.1;
+		 		cout << "Colisiono!!!" << "\n";
 
 		 	}
 		 //Dibujo la escena

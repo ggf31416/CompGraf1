@@ -14,9 +14,11 @@ namespace fisica {
 using namespace math;
 
 Rampa::Rampa(float3* superiores,float3 * inferiores) {
+	std::cout << "superiores: ";
 	for(int i = 0; i < 4; i++){
 			std::cout << i << " " << float3(superiores[i]) << ",";
 	}
+	std::cout << "\ninferiores: ";
 	for(int i = 0; i < 4; i++){
 			std::cout << i << " " << float3(inferiores[i]) << ",";
 	}
@@ -34,26 +36,39 @@ Rampa::Rampa(float3* superiores,float3 * inferiores) {
 			v_alto = superiores[i];
 		}
 	}
+	std::cout << "\n";
 	for(int i = 0; i < 4; i++){
 		this->inferior[i] = inferiores[i];
 	}
+	std::cout << "\n";
 
 
 
+	std::cout << "superior: ";
+		for(int i = 0; i < 4; i++){
+				std::cout << i << " " << float3(superior[i]) << ",";
+		}
+		std::cout << "\n";
+		std::cout << "inferior: ";
+		for(int i = 0; i < 4; i++){
+				std::cout << i << " " << float3(inferior[i]) << ",";
+		}
+		std::cout << "\n";
 	float x_min = Min(inferior[0].x,inferior[1].x,inferior[2].x);
-	std::cout << "x_min" << x_min << "\n";
+	std::cout << "x_min= " << x_min << "\n";
 	float y_min = Min(inferior[0].y,inferior[1].y,inferior[2].y);
-	std::cout << "y_min" << y_min << "\n";
+	std::cout << "y_min= " << y_min << "\n";
 	float z_min = Min(inferior[0].z,inferior[1].z,inferior[2].z);
-	std::cout << "z_min" << z_min << "\n";
+	std::cout << "z_min= " << z_min << "\n";
 
 	float x_max = Max(inferior[0].x,inferior[1].x,inferior[2].x);
-	std::cout << "x_min" << x_max << "\n";
+	std::cout << "x_max= " << x_max << "\n";
 	float z_max = Max(inferior[0].z,inferior[1].z,inferior[2].z);
-	std::cout << "z_min" << z_max << "\n";
+	std::cout << "z_max= " << z_max << "\n";
 
 	float y_min_s = Min(superior[0].y,superior[1].y,superior[2].y,superior[3].y);
-	std::cout << "y_min_s" << y_min_s << "\n";
+	std::cout << "y_min_s= " << y_min_s << "\n";
+	std::cout << "v_alto= " << v_alto << "\n";
 
 	float dif = y_max - y_min_s;
 

@@ -39,6 +39,8 @@ public:
 
 	bool estaSobrePista();
 
+
+
 	void simular(float dt);
 
 	void test();
@@ -47,7 +49,7 @@ public:
 
 	virtual ~ManejadorFisica();
 
-
+	bool colisiono = false;
 
 private:
 	//math::KdTree<AABB> arbol;
@@ -56,7 +58,7 @@ private:
 	std::vector<fisica::ObjetoFisico*>* objetos;
 	FisicaMoto* fm;
 	Gravedad g;
-	bool choco;
+
 	bool sobrePista;
 
 };
