@@ -25,6 +25,9 @@ ManejadorFisica::ManejadorFisica() {
 	this->colisiono = false;
 	this->sobrePista =false;
 	this->pistaActual = 0;
+	this->aceleracionPropia = 0;
+	this->direccionMoto = float3::unitX;
+	this->velMoto = float3::zero;
 	checkearCalcY();
 }
 
@@ -80,7 +83,7 @@ void ManejadorFisica::detectarColisionMoto(){
 				sobrePista = true;
 				Pista* pista = dynamic_cast<Pista*>(obj);
 				if (pista){
-					float3 acelg = acelPendientePista(pista,this->g);
+					acelGravedad = acelPendientePista(pista,this->g);
 					this->pistaActual =pista;
 				}
 			}
@@ -89,6 +92,9 @@ void ManejadorFisica::detectarColisionMoto(){
 			}
 		}
 		colisiono &= !sobrePista;
+	}
+	if (!sobrePista){
+		acelGravedad = g.AcelCaida();
 	}
 }
 
@@ -139,11 +145,10 @@ void ManejadorFisica::registrarRampaConObs(float3* arriba, float3* abajo) {
 
 void ManejadorFisica::establecerGravedad(float acelHaciaAbajo){
 	this->g.g = -acelHaciaAbajo;
+	this->acelGravedad = g.AcelCaida();
 }
 
-void ManejadorFisica::registrarMoto(){
 
-}
 
 void ManejadorFisica::establecerPosicionMoto(float x, float y, float z){
 	float3 p(x,y,z);
@@ -156,7 +161,46 @@ bool ManejadorFisica::estaSobrePista(){
 
 void ManejadorFisica::simular(float dt){
 	detectarColisionMoto();
+	float3 dv_grav = simularGravedad(dt);
+	std::cout <<  "dt: " << dt << "    gv_grav : "<< dv_grav << "   vel " << velMoto << "  -> ";
+	float3 dv_propio = direccionMoto  *  aceleracionPropia * dt;
+	velMoto = velMoto + dv_propio + dv_grav;
+	float3 deltaPos = velMoto * dt;
+	fm->trasladar(deltaPos);
+	if (this->sobrePista){
+		fm->setY(this->getAltura());
+	}
+	else if (this->colisiono){
+		fm->setX(fm->getX() - 0.01);
+	}
+	else if (fm->getY() < this->alturaPiso){
+		fm->setY(this->alturaPiso);
+	}
+	//if (velMoto->)
+	std::cout << "Pos Moto: "<< fm->getPos() << "SobrePista?: " << this->sobrePista << "\n";
 
+}
+
+float3 calcularVelocidadPostImpacto(float3 vel,float3 normalPlano){
+	// calcular proyeccion de velocidad sobre normal
+	float3 proyN = vel.Dot(normalPlano) * normalPlano;
+	return vel - proyN;
+}
+
+// retorna cambio de velocidad por gravedad
+float3 ManejadorFisica::simularGravedad(float dt){
+
+	if (this->fm->getY() <= alturaPiso){
+		return float3::zero;
+	}
+	else{
+		return acelGravedad * dt;
+	}
+
+}
+
+bool ManejadorFisica::estaEnElAire(){
+	return false;
 }
 
 

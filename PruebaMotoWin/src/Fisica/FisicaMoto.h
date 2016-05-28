@@ -36,8 +36,27 @@ public:
 		return this->boundingBox.Intersects(obs);
 	}
 
-
 	math::AABB boundingBox;
+
+
+	math::float3 getPos(){
+		return this->boundingBox.minPoint;
+	}
+	float getX(){ return getPos().x;}
+	float getY(){ return getPos().y;}
+	float getZ(){ return getPos().z;}
+
+	void setY(float y){
+		math::float3 dif(0,y - getY(),0);
+		trasladar(dif);
+	}
+
+	void setX(float x){
+		math::float3 dif(x - getX(),0,0);
+		trasladar(dif);
+	}
+
+
 private:
 
 	math::OBB boxSuperior;

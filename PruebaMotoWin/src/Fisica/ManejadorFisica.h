@@ -34,16 +34,15 @@ public:
 
 	void establecerGravedad(float acelHaciaAbajo);
 
-	void registrarMoto();
 
 	void establecerPosicionMoto(float x, float y, float z);
 
 	bool estaSobrePista();
+	bool estaEnElAire();
 
 
 
 	void simular(float dt);
-
 	void test();
 
 
@@ -52,20 +51,58 @@ public:
 
 	bool colisiono;
 	bool sobrePista;
+
+
+	float alturaPiso = 0;
 	float getAltura();
+	void acelerarMotoAdelante(float acel){
+		this->aceleracionPropia = acel;
+	}
+
+	void setVelocidadX(float x){
+		this->velMoto.x = x;
+	}
+
+	void setVelocidad(float x,float y, float z){
+		this->velMoto = float3(x,y,z);
+	}
+
+	float posX(){
+		return fm->getX();
+	}
+
+	float posY(){
+		return fm->getY();
+	}
+
+	float velX(){
+		return velMoto.x;
+	}
+
+	float velY(){
+		return velMoto.y;
+	}
+
+	void aumentarY( float y){
+		fm->setY(fm->getY()+ y);
+	}
+
 
 private:
 	//math::KdTree<AABB> arbol;
 	void detectarColisionMoto();
 	void detectarColision(AABB q,std::vector<fisica::ObjetoFisico*>& lst);
+	math::float3 simularGravedad(float dt);
+
 	std::vector<fisica::ObjetoFisico*>* objetos;
 	FisicaMoto* fm;
 	Gravedad g;
-
-
-
-
+	math::float3 acelGravedad;
 	fisica::Pista* pistaActual;
+
+	float aceleracionPropia;
+	math::float3 velMoto;
+	math::float3 direccionMoto;
 
 };
 

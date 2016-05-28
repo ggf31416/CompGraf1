@@ -39,6 +39,10 @@ public:
 		return fr.colisiona(aabb) && fr.colisiona(plano);
 	}
 
+	virtual math::float3 getNormalAt(math::float3 pos){
+		return plano.normal;
+	}
+
 	virtual bool esObstaculo(){
 		return false;
 	}

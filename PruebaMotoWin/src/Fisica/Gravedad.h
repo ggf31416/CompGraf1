@@ -24,7 +24,9 @@ public:
 	// calcula posicion exacta a los dt segundos de iniciado el vuelo
 	math::float3 CaidaLibre(math::float3 pos_ini,math::float3 vel_ini, float dt);
 
-
+	math::float3 AcelCaida(){
+		return float3(0,g,0);
+	}
 
 	float g;
 };

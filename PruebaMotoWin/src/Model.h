@@ -28,7 +28,7 @@ public:
 	//Manejo de Moto
 	//Incrementa la velocidad aX en X y aY en Y por unidad de tiempo
 	void acelerar(GLdouble aX,GLdouble aY,GLdouble dt);
-
+	bool usarWireframe;
 
 private:
 	static const GLdouble relLargoEjeTrasero = 0.173553719; //(2.1/12.1)

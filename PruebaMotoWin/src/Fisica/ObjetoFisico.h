@@ -9,6 +9,7 @@
 #define OBJETOFISICO_H_
 
 #include "MatGeoLib/Geometry/AABB.h"
+#include "MatGeoLib/Math/float3.h"
 #include "FisicaMoto.h"
 
 
@@ -42,6 +43,14 @@ public:
 	 bool Intersects(const AABB &q) const{
 		 return getAABB().Intersects(q);
 	 }
+
+	 // retornar normal en el punto especificado de la superficie
+	 // puede ignorar el parametro y
+	 math::float3 getNormalAt(math::float3 pos){
+		 return float3::unitY;
+	 }
+
+
 
 
 };

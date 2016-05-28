@@ -13,7 +13,7 @@ Model::Model() {
 	this->velY = 0.0;
 	this->posX = 0;
 	this->posY = 0;
-
+	this->usarWireframe = false;
 
 }
 
@@ -150,10 +150,13 @@ void Model::apply_material(const aiMaterial *mtl)
 	}
 
 	max = 1;
-	if(AI_SUCCESS == aiGetMaterialIntegerArray(mtl, AI_MATKEY_ENABLE_WIREFRAME, &wireframe, &max))
-		fill_mode = wireframe ? GL_LINE : GL_FILL;
+	if (usarWireframe)
+		fill_mode = GL_LINE;
+	else if(AI_SUCCESS == aiGetMaterialIntegerArray(mtl, AI_MATKEY_ENABLE_WIREFRAME, &wireframe, &max))
+			fill_mode = wireframe ? GL_LINE : GL_FILL;
 	else
 		fill_mode = GL_FILL;
+
 	glPolygonMode(GL_FRONT_AND_BACK, fill_mode);
 
 	max = 1;
