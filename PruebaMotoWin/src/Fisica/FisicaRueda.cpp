@@ -20,12 +20,14 @@ FisicaRueda::FisicaRueda(){
 }
 
 FisicaRueda::FisicaRueda(float3 centroRueda,float radioRueda,float anchoRueda){
-	this->centroRueda =centroRueda;
+	this->centroRueda = centroRueda;
 	this->radioRueda = radioRueda;
 	this->anchoRueda = anchoRueda;
 	this->usarSoloBox = false;
 	actualizarBox();
 }
+
+
 
 FisicaRueda::~FisicaRueda(){
 

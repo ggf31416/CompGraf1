@@ -6,7 +6,9 @@
  */
 
 #include "FisicaMoto.h"
-
+#include <GL/gl.h>
+#include "MatGeoLib/Geometry/LineSegment.h"
+#include <iostream>
 
 
 
@@ -65,26 +67,46 @@ void FisicaMoto::setPosicion(math::float3 p){
 }
 
 void FisicaMoto::rotar(float grados,math::float3 centro){
-	Quat q;
-	q.RotateZ(grados);
+	Quat q = Quat::RotateZ(grados);
+	trasladar(-centro);
+	this->boxSuperior =  q * this->boxSuperior  ;
+	this->ruedas[0].centroRueda = q * this->ruedas[0].centroRueda;
+	this->ruedas[1].centroRueda = q * this->ruedas[1].centroRueda;
+	trasladar(centro);
+
+
 }
 
-void establecerEjes(OBB box,float3* ejes){
+
+void establecerEjes(OBB& box,float3* ejes){
 	box.axis[0] = ejes[0];
 	box.axis[1] = ejes[1];
 	box.axis[2] = ejes[2];
-
 }
 // TODO
 void FisicaMoto::establecerDireccion(float3  adelante){
 	float3 adelante_n = adelante.Normalized();
 	Quat q = Quat::LookAt(float3::unitX,adelante_n,float3::unitZ,float3::unitZ);
-	ejes[0] = q * float3::unitX;
-	ejes[1] = q * float3::unitY;
-	ejes[2] = q * float3::unitZ;
+	ejes[0] = (q * float3::unitX).Normalized();
+	ejes[1] = (q * float3::unitY).Normalized();
+	ejes[2] = (q * float3::unitZ).Normalized();
 	establecerEjes(this->boxSuperior,this->ejes);
-	establecerEjes(this->ruedas[0].boxRueda,this->ejes);
-	establecerEjes(this->ruedas[1].boxRueda,this->ejes);
+	//establecerEjes(this->ruedas[0].boxRueda,this->ejes);
+	//establecerEjes(this->ruedas[1].boxRueda,this->ejes);
+}
+
+// devuelve vector adelante nuevo
+float3 FisicaMoto::posicionarPorRuedas(math::float3 rueda0,math::float3 rueda1){
+	float3 centroRuedas = ruedas[0].centroRueda + (ruedas[1].centroRueda - ruedas[0].centroRueda) / 2;
+	float altoCentroBox = (boxSuperior.pos - centroRuedas).Length();
+	float largoOriginal = (ruedas[1].centroRueda - ruedas[0].centroRueda).Length() / 2;
+	float3 dir = rueda1 - rueda0;
+	establecerDireccion(dir);
+	centroRuedas =   rueda0 + (rueda1 - rueda0) / 2;
+	boxSuperior.pos = centroRuedas + boxSuperior.axis[1] * altoCentroBox;
+	this->ruedas[0].setCentro( centroRuedas - boxSuperior.axis[0] * largoOriginal);
+	this->ruedas[1].setCentro( centroRuedas + boxSuperior.axis[0] * largoOriginal);
+	return dir;
 }
 
 
@@ -97,6 +119,32 @@ bool FisicaMoto::colisiona(const math::OBB &obs) {
 }
 bool FisicaMoto::colisiona(const math::Triangle &obs) {
 	return this->boxSuperior.Intersects(obs);
+}
+
+void FisicaMoto::dibujarBB(){
+	glColor3f(0.0, 0.0, 1.0);
+	glBegin(GL_LINES);
+	math::OBB box = boxSuperior;
+	for(int i = 0; i < box.NumEdges(); i++){
+		math::LineSegment seg = box.Edge(i);
+		glVertex3f(seg.a.x, seg.a.y, seg.a.z);
+		glVertex3f(seg.b.x, seg.b.y, seg.b.z);
+	}
+	glColor3f(1.0, 0.0, 0.0);
+	for(int i = 0; i < 3; i++){
+		float3 p = box.pos + box.axis[i] * box.r[i];
+		glVertex3f(box.pos.x, box.pos.y, box.pos.z);
+		glVertex3f(p.x,p.y,p.z);
+	}
+
+	glEnd();
+	glBegin(GL_POINTS);
+		for(int i = 0; i < 2; i++){
+			float3 r = ruedas[i].centroRueda;
+			glVertex3f(r.x,r.y,r.z);
+		}
+
+	glEnd();
 }
 
 

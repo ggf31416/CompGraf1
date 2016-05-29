@@ -9,8 +9,7 @@
 #include "BoxObstaculo.h"
 #include <iostream>
 
-namespace fisica {
-
+using namespace fisica;
 using namespace math;
 
 Rampa::Rampa(float3* superiores,float3 * inferiores) {
@@ -101,4 +100,4 @@ Rampa::~Rampa() {
 	// TODO Auto-generated destructor stub
 }
 
-} /* namespace test */
+

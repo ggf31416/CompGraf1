@@ -20,6 +20,9 @@
 class ManejadorFisica {
 public:
 
+	bool colisiono;
+	bool sobrePista;
+
 
 	ManejadorFisica();
 
@@ -49,8 +52,6 @@ public:
 
 	virtual ~ManejadorFisica();
 
-	bool colisiono;
-	bool sobrePista;
 
 
 	float alturaPiso = 0;
@@ -87,8 +88,16 @@ public:
 		fm->setY(fm->getY()+ y);
 	}
 
+	void dibujarBB(){
+		fm->dibujarBB();
+	}
+
+	// devuelve el angulo de la moto en relacion al ejeX en grados
+	float getAnguloVertical();
 
 private:
+
+
 	//math::KdTree<AABB> arbol;
 	void detectarColisionMoto();
 	void detectarColision(AABB q,std::vector<fisica::ObjetoFisico*>& lst);
@@ -102,6 +111,8 @@ private:
 
 	float aceleracionPropia;
 	math::float3 velMoto;
+	math::float3 velRueda0;
+	math::float3 velRueda1;
 	math::float3 direccionMoto;
 
 };

@@ -11,6 +11,7 @@
 #include "MatGeoLib/Geometry/AABB.h"
 #include "MatGeoLib/Geometry/OBB.h"
 #include "MatGeoLib/Geometry/Triangle.h"
+#include "MatGeoLib/Geometry/Plane.h"
 
 
 class FisicaRueda{
@@ -22,6 +23,10 @@ class FisicaRueda{
 		bool colisiona(const math::OBB &obs) ;
 		bool colisiona(const math::Triangle &obs) ;
 		void transladar(math::float3 vec);
+		void setCentro(math::float3 vec){
+			this->centroRueda = vec;
+			actualizarBox();
+		}
 
 		bool colisiona(const math::Plane &obs) {
 			return this->boxRueda.Intersects(obs) && this->centroRueda.Distance(obs) < this->radioRueda;
@@ -29,6 +34,23 @@ class FisicaRueda{
 		bool colisiona(const math::Polygon &obs) {
 			return this->boxRueda.Intersects(obs);
 		}
+
+		math::float3 puntoMasCercano(const math::Plane &obs){
+			return obs.ClosestPoint(this->centroRueda);
+		}
+
+		math::float3 puntoMasCercano(const math::AABB &obs){
+			return obs.ClosestPoint(this->centroRueda);
+		}
+
+		math::float3 puntoMasCercano(const math::Triangle &obs){
+			return obs.ClosestPoint(this->centroRueda);
+		}
+
+		math::float3 puntoMasCercano(const math::OBB &obs){
+			return obs.ClosestPoint(this->centroRueda);
+		}
+
 
 		bool usarSoloBox;
 

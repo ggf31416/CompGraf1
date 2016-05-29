@@ -13,6 +13,8 @@
 #include "Model.h"
 
 #include "Fisica/ManejadorFisica.h"
+#include "Fisica/Rampa.h"
+#include "Fisica/MatGeoLib/Geometry/OBB.h"
 
 #define SCREEN_WIDTH  1000
 #define SCREEN_HEIGHT 640
@@ -62,8 +64,11 @@ GLfloat inicioNivel[3] = { -10, 0, 0 };
 GLfloat finNivel[3] = { 10, 0, 0 };
 GLdouble angulo = 0; //Angulo de inclinacion de la moto
 bool wireframe = false;
+bool sostengoClickDerecho = false;
 
 ManejadorFisica* manejador;
+
+std::vector<Info_Rampa> rampasRectas;
 
 void quit(int ret) {
 	SDL_Quit();
@@ -96,19 +101,22 @@ void registrarRampa(float x_base, float y_base, float x_size, float z_size,
 
 	std::cout << "\n";
 	manejador->registrarRampaConObs(arriba, abajo);
+	Info_Rampa info;
+	info.init(x_base,y_base,x_size,z_size,altura_x_min,altura_x_max);
+	rampasRectas.push_back(info);
 }
 
-void dibujaRampa(float x_base, float y_base, float x_size, float z_size,
-		float altura_x_min, float altura_x_max) {
-	float z_base = -z_size / 2;
-	math::float3 v0(x_base, y_base, z_base);
-	math::float3 v1 = v0 + float3(x_size, 0, 0);
-	math::float3 v2 = v1 + float3(0, altura_x_max, 0);
-	math::float3 v3 = v0 + float3(0, altura_x_min, 0);
-	math::float3 v4 = v0 + float3(0, 0, z_size);
-	math::float3 v5 = v4 + float3(x_size, 0, 0);
-	math::float3 v6 = v2 + float3(0, 0, z_size);
-	math::float3 v7 = v0 + float3(0, altura_x_min, z_size);
+void dibujaRampa(const Info_Rampa& i){//(float x_base, float y_base, float x_size, float z_size,float altura_x_min, float altura_x_max) {
+
+	float z_base = -i.z_size / 2;
+	math::float3 v0(i.x_base, i.y_base, z_base);
+	math::float3 v1 = v0 + float3(i.x_size, 0, 0);
+	math::float3 v2 = v1 + float3(0, i.altura_x_max, 0);
+	math::float3 v3 = v0 + float3(0, i.altura_x_min, 0);
+	math::float3 v4 = v0 + float3(0, 0, i.z_size);
+	math::float3 v5 = v4 + float3(i.x_size, 0, 0);
+	math::float3 v6 = v2 + float3(0, 0, i.z_size);
+	math::float3 v7 = v0 + float3(0, i.altura_x_min, i.z_size);
 
 	glColor3f(0.0f, 1.0f, 0.0f); /* Set The Color To Green           */
 	DRAW_QUAD2(v4, v5, v6, v7); // front
@@ -193,10 +201,9 @@ void registrarRampas() {
 }
 
 void dibujarRampas() {
-	dibujaRampa(-0.5, -0.5, 1, 1, 1, 2);
-	dibujaRampa(2, -0.5, 1, 1, 1, 2);
-	dibujaRampa(4, -0.5, 1, 1, 1, 2);
-	dibujaRampa(-5, -0.5, 1, 1, 0, 2);
+	for(int i = 0; i < rampasRectas.size(); i++){
+		dibujaRampa(rampasRectas[i]);
+	}
 }
 
 void draw_ramp(void) {
@@ -317,6 +324,7 @@ int init_gl() {
 	return (TRUE);
 }
 
+
 int draw_gl_scene() {
 	/* These are to calculate our fps */
 	static GLint T0 = 0;
@@ -368,7 +376,9 @@ int draw_gl_scene() {
 	glTranslatef(0.0, 0.0, 0.0);
 	//glCallList(ramp_list);
 	//mostrarObstaculo();
+	manejador->dibujarBB();
 	dibujarRampas();
+
 	/*
 	 glTranslatef(0.0, 0.0, 0.0);
 	 glScalef(0.25, 0.25, 0.25);
@@ -396,7 +406,7 @@ int draw_gl_scene() {
 
 	glTranslated(inicioNivel[0] + (max->x - min->x) / 2, 0, 0);
 
-	model2->draw(angulo);
+	model2->draw(angulo , manejador->getAnguloVertical());
 
 	glPopMatrix();
 
@@ -441,9 +451,11 @@ int draw_gl_scene() {
 
 void configurarFisica() {
 	manejador = new ManejadorFisica();
-	manejador->establecerGravedad(0.2);
+	manejador->establecerGravedad(0.5);
 	registrarRampas();
 }
+
+
 
 int main(int argc, char *argv[]) {
 

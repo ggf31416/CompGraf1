@@ -40,7 +40,8 @@ public:
 
 
 	math::float3 getPos(){
-		return this->boundingBox.minPoint;
+
+		return this->boxSuperior.PointInside(0.5,0.5,0);
 	}
 	float getX(){ return getPos().x;}
 	float getY(){ return getPos().y;}
@@ -56,12 +57,18 @@ public:
 		trasladar(dif);
 	}
 
+	math::float3 posicionarPorRuedas(math::float3 rueda0,math::float3 rueda1);
+	FisicaRueda* ruedas;
+	math::OBB boxSuperior;
+
+
+	void dibujarBB();
 
 private:
 
-	math::OBB boxSuperior;
+
 	math::float3 ejes[];
-	FisicaRueda* ruedas;
+
 
 
 

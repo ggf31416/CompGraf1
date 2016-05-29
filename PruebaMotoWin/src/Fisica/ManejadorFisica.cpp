@@ -12,11 +12,13 @@
 #include "BoxObstaculo.h"
 #include "Pista.h"
 
+
 using namespace math;
 using namespace fisica;
 
 
 void checkearCalcY();
+float calcY(const math::Plane& plano, float x, float z);
 
 ManejadorFisica::ManejadorFisica() {
 	// TODO Auto-generated constructor stub
@@ -28,7 +30,7 @@ ManejadorFisica::ManejadorFisica() {
 	this->aceleracionPropia = 0;
 	this->direccionMoto = float3::unitX;
 	this->velMoto = float3::zero;
-	checkearCalcY();
+	//checkearCalcY();
 }
 
 void ManejadorFisica::detectarColision(AABB q,std::vector<fisica::ObjetoFisico*>& lst){
@@ -69,11 +71,35 @@ float3 acelPendientePista(Pista* p,Gravedad& g){
 	return acel;
 }
 
+// calcula interseccion con rueda puntual por la altura del punto
+// retorna si hubo colision, si la hubo nuevaPos es un punto sobre la pista, de lo contrario es la posicion vieja
+bool calcularPosicionRuedaSimple(Pista* pista, const float3& centroRueda,float3& nuevaPos){
+	float3 p(centroRueda.x,calcY(pista->plano,centroRueda.x,centroRueda.z),centroRueda.z);
+	if (pista->getAABB().Contains(p)){
+		float eps = 0.001;
+		if (centroRueda.y <=  eps + p.y){
+			nuevaPos = pista->plano.ClosestPoint(p);
+			return true;
+		}
+
+	}
+
+	nuevaPos = centroRueda;
+	return false;
+
+}
+
+
+
 void ManejadorFisica::detectarColisionMoto(){
 	std::vector<fisica::ObjetoFisico*> tmp;
 	detectarColision(fm->boundingBox,tmp);
 	sobrePista =false;
 	colisiono = false;
+	Pista* pista0 = 0;
+	Pista* pista1 = 0;
+	float3 punto0;
+	float3 punto1;
 	for(unsigned int i = 0; i < tmp.size(); i++){
 
 		ObjetoFisico* obj = tmp[i];
@@ -85,6 +111,12 @@ void ManejadorFisica::detectarColisionMoto(){
 				if (pista){
 					acelGravedad = acelPendientePista(pista,this->g);
 					this->pistaActual =pista;
+					if (calcularPosicionRuedaSimple(pista,fm->ruedas[0].centroRueda,punto0)){
+						pista0 = pista;
+					}
+					if (calcularPosicionRuedaSimple(pista,fm->ruedas[1].centroRueda,punto1)){
+						pista1 = pista;
+					}
 				}
 			}
 			else{
@@ -92,6 +124,15 @@ void ManejadorFisica::detectarColisionMoto(){
 			}
 		}
 		colisiono &= !sobrePista;
+	}
+	/*if (pista0){
+		fm->ruedas[0].setCentro(punto0);
+	}
+	if (pista1){
+		fm->ruedas[1].setCentro(punto1);
+	}*/
+	if (pista0 || pista1){
+		fm->posicionarPorRuedas(punto0,punto1);
 	}
 	if (!sobrePista){
 		acelGravedad = g.AcelCaida();
@@ -133,14 +174,15 @@ void ManejadorFisica::registrarRampaConObs(float* arr, unsigned char* arribaIdx,
 	for(int i = 0; i < 4; i++) arriba[i] = toFloat3(arr,arribaIdx[i] * 3);
 	for(int i = 0; i < 4; i++) abajo[i] = toFloat3(arr,abajoIdx[i] * 3);
 
-	fisica::Rampa r =  Rampa(arriba,abajo);
+	Rampa r =  Rampa(arriba,abajo);
 	r.generarObjetos(this->objetos);
 }
 
 
 void ManejadorFisica::registrarRampaConObs(float3* arriba, float3* abajo) {
-	fisica::Rampa r =  Rampa(arriba,abajo);
+	Rampa r =  Rampa(arriba,abajo);
 	r.generarObjetos(this->objetos);
+	//return r;
 }
 
 void ManejadorFisica::establecerGravedad(float acelHaciaAbajo){
@@ -159,33 +201,19 @@ bool ManejadorFisica::estaSobrePista(){
 	return sobrePista;
 }
 
-void ManejadorFisica::simular(float dt){
-	detectarColisionMoto();
-	float3 dv_grav = simularGravedad(dt);
-	std::cout <<  "dt: " << dt << "    gv_grav : "<< dv_grav << "   vel " << velMoto << "  -> ";
-	float3 dv_propio = direccionMoto  *  aceleracionPropia * dt;
-	velMoto = velMoto + dv_propio + dv_grav;
-	float3 deltaPos = velMoto * dt;
-	fm->trasladar(deltaPos);
-	if (this->sobrePista){
-		fm->setY(this->getAltura());
-	}
-	else if (this->colisiono){
-		fm->setX(fm->getX() - 0.01);
-	}
-	else if (fm->getY() < this->alturaPiso){
-		fm->setY(this->alturaPiso);
-	}
-	//if (velMoto->)
-	std::cout << "Pos Moto: "<< fm->getPos() << "SobrePista?: " << this->sobrePista << "\n";
-
-}
 
 float3 calcularVelocidadPostImpacto(float3 vel,float3 normalPlano){
 	// calcular proyeccion de velocidad sobre normal
 	float3 proyN = vel.Dot(normalPlano) * normalPlano;
 	return vel - proyN;
 }
+
+float3 sinPerdidaDeVelocidad(float3 vel,float3 dirAvanceNueva){
+	// calcular proyeccion de velocidad sobre normal
+	float3 proyN = vel.Dot(dirAvanceNueva) * dirAvanceNueva;
+	return proyN;
+}
+
 
 // retorna cambio de velocidad por gravedad
 float3 ManejadorFisica::simularGravedad(float dt){
@@ -198,6 +226,44 @@ float3 ManejadorFisica::simularGravedad(float dt){
 	}
 
 }
+
+float ManejadorFisica::getAnguloVertical(){
+	// angulo entre direccionMoto y vertical
+	return RadToDeg(Acos(direccionMoto.x));
+}
+
+void ManejadorFisica::simular(float dt){
+
+	float3 dv_grav = simularGravedad(dt);
+	//std::cout <<  "dt: " << dt << "    gv_grav : "<< dv_grav << "   vel " << velMoto << "  -> ";
+	this->direccionMoto = fm->boxSuperior.axis[0];
+	float3 dv_propio = direccionMoto  *  aceleracionPropia * dt;
+	velMoto = velMoto + dv_propio + dv_grav;
+	float3 deltaPos = velMoto * dt;
+	fm->trasladar(deltaPos);
+
+	detectarColisionMoto();
+
+	// calculo direccion moto (rueda delantera - trasera)
+	/*this->direccionMoto = fm->ruedas[1].centroRueda - fm->ruedas[0].centroRueda;
+	this->direccionMoto.Normalize();*/
+
+
+	if (this->sobrePista){
+		this->velMoto = sinPerdidaDeVelocidad(velMoto,direccionMoto);
+	}
+	else if (this->colisiono){
+		fm->setX(fm->getX() - 0.01);
+	}
+	else if (fm->getY() < this->alturaPiso){
+		fm->setY(this->alturaPiso);
+	}
+	//if (velMoto->)
+
+	//std::cout << "Pos Moto: "<< fm->getPos() << "SobrePista?: " << this->sobrePista << "\n";
+
+}
+
 
 bool ManejadorFisica::estaEnElAire(){
 	return false;
@@ -300,3 +366,5 @@ float ManejadorFisica::getAltura(){
 		return fm->boundingBox.minPoint.y;
 	}
 }
+
+

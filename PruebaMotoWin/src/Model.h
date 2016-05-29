@@ -21,7 +21,7 @@ public:
 	virtual ~Model();
 	int loadasset (const GLchar* path);
 	void display();
-	void draw(GLdouble angulo);
+	void draw(GLdouble angulo,GLdouble angulo_centro);
 	void get_bounding_box_for_node (const aiNode* nd,aiVector3D* min,aiVector3D* max,aiMatrix4x4* trafo);
 	void get_bounding_box (aiVector3D* min, aiVector3D* max);
 
