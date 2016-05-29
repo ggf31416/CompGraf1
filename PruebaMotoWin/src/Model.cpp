@@ -328,7 +328,7 @@ void Model::draw(GLdouble angulo,GLdouble angulo_centro)
 	GLdouble largoMoto = (max->x-min->x);
 	GLdouble altoMoto = (max->y-min->y);
 	//Muevo moto
-	glTranslated(posX - largoMoto/2,posY - altoMoto / 2,0);
+	glTranslated(posX - largoMoto/2,posY ,0);
 
 	//Roto moto
 	glTranslated(-largoMoto/2+largoMoto*relLargoEjeTrasero,altoMoto*relAltoEjeTrasero,0);
@@ -337,12 +337,13 @@ void Model::draw(GLdouble angulo,GLdouble angulo_centro)
 	float centro_rot_x = largoMoto / 2;
 	float centro_rot_y = altoMoto / 2;
 	glColor3f(1,0,1);
-	glTranslated(0, centro_rot_y,0);
+	glTranslated(0,0,0);
+	// centro de rotacion
 	glBegin(GL_POINTS);
 	glVertex3d(0, 0, 0);
 	glEnd();
 	glRotated(angulo_centro,0,0,1);
-	glTranslated(0, -centro_rot_y,0);
+	glTranslated(0, 0,0);
 
 
 

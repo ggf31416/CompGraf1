@@ -41,7 +41,7 @@ public:
 
 	math::float3 getPos(){
 
-		return this->boxSuperior.PointInside(0.5,0.5,0);
+		return this->boxSuperior.PointInside(0.5,0.0,0);
 	}
 	float getX(){ return getPos().x;}
 	float getY(){ return getPos().y;}

@@ -483,8 +483,8 @@ int main(int argc, char *argv[]) {
 	//Rozamiento es una "aceleracion negativa";
 	//Angulo es la inclinacion de la moto respecto a la rueda trasera
 	//Desacel es lo que desacelera la moto
-	GLdouble acelX = 0.3, acelY = 0.00, desacelX = -0.1, desacelY = -0.00,
-			rozamientoX = -0.05, rozamientoY = -0.00;
+	GLdouble acelX = 0.6, acelY = 0.00, desacelX = -0.15, desacelY = -0.00,
+			rozamientoX = -0.1, rozamientoY = -0.00;
 	GLdouble frenoX = -1.0;
 
 	int pantallaX = SCREEN_WIDTH;
