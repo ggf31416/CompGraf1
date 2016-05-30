@@ -65,6 +65,7 @@ GLfloat finNivel[3] = { 10, 0, 0 };
 GLdouble angulo = 0; //Angulo de inclinacion de la moto
 bool wireframe = false;
 bool sostengoClickDerecho = false;
+bool enPausa = false;
 
 ManejadorFisica* manejador;
 
@@ -185,6 +186,9 @@ void handle_key_press(SDL_keysym * keysym) {
 		break;
 	case SDLK_w:
 		cambiarWireframe();
+		break;
+	case SDLK_p:
+		enPausa = !enPausa;
 		break;
 	default:
 		break;
@@ -566,6 +570,8 @@ int main(int argc, char *argv[]) {
 	SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
 	SDL_ShowCursor(1); // 0 para ocultarlo
 
+	int mouse_x_old, mouse_y_old;
+
 	/* wait for events */
 	while (!done) {
 		dt = tiempo;
@@ -640,31 +646,49 @@ int main(int argc, char *argv[]) {
 				handle_key_press(&event.key.keysym);
 				break;
 			case SDL_MOUSEBUTTONDOWN:
-				if (event.button.button == SDL_BUTTON_LEFT) {
+				/*if (event.button.button == SDL_BUTTON_LEFT) {
 					//move_forward(cam,-5 * 60.0f / 1000.0f);
 					cam.radio -= 5 * 60.0f / 1000.0f;
 				} else if (event.button.button == SDL_BUTTON_RIGHT) {
 					cam.radio += 5 * 60.0f / 1000.0f;
 					//move_forward(cam,5 * 60.0f / 1000.0f);
+				}*/
+				if (event.button.button == SDL_BUTTON_RIGHT){
+					sostengoClickDerecho = true;
+					SDL_ShowCursor(0);
+				}
+				else if (event.button.button == SDL_BUTTON_WHEELDOWN){
+					acercar_camara(cam, - (5.0f / 1000.0f  * dt));
+				}
+				else if (event.button.button == SDL_BUTTON_WHEELUP){
+					acercar_camara(cam,   (5.0f / 1000.0f  * dt));
+				}
+				break;
+			case SDL_MOUSEBUTTONUP:
+				if (event.button.button == SDL_BUTTON_RIGHT){
+					sostengoClickDerecho = false;
+					SDL_ShowCursor(1);
 				}
 				break;
 			case SDL_MOUSEMOTION: {
 				// inspirado en http://lazyfoo.net/SDL_tutorials/lesson09/index.php
+
 				int mouse_x; // event.motion.x;
 				int mouse_y; // = event.motion.y;
 				SDL_GetMouseState(&mouse_x, &mouse_y);
-				int mouse_dx = mouse_x - pantallaX / 2;
-				int mouse_dy = mouse_y - pantallaY / 2;
-				if (!(mouse_dx == 0 && mouse_dy == 0)) {
-					float dang_x = -mouse_dx * 3.0f * dt / 1000.0;
-					float dang_y = -mouse_dy * 3.0f * dt / 1000.0;
+				if (sostengoClickDerecho){
+					int mouse_dx = mouse_x - pantallaX / 2;
+					int mouse_dy = mouse_y - pantallaY / 2;
+					if (!(mouse_dx == 0 && mouse_dy == 0)) {
+						float dang_x = -mouse_dx * 3.0f * dt / 1000.0;
+						float dang_y = -mouse_dy * 3.0f * dt / 1000.0;
 
-					rot_x(cam, dang_x);
+						rot_x(cam, dang_x);
 
-					rot_y(cam, dang_y, -15, 60);
-					SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
+						rot_y(cam, dang_y, -15, 60);
+						SDL_WarpMouse(pantallaX / 2, pantallaY / 2);
+					}
 				}
-
 			}
 				break;
 
@@ -723,22 +747,25 @@ int main(int argc, char *argv[]) {
 		 cam.pos.z = 3;*/
 
 		//render(cam);
-		manejador->simular(dt / 1000.0f );
-		if (manejador->colisiono && model2->velX > 0) {
-//		 		model2->velX = 0;
-			manejador->setVelocidadX(0);
-			//model2->posX -= 0.1;
-			cout << "Colisiono!!!" << "\n";
-		}
+		if (!enPausa){
+			manejador->simular(dt / 1000.0f );
+
+			if (manejador->colisiono && model2->velX > 0) {
+	//		 		model2->velX = 0;
+				manejador->setVelocidadX(0);
+				//model2->posX -= 0.1;
+				cout << "Colisiono!!!" << "\n";
+			}
 
 		model2->posX = manejador->posX() + 10;
 		model2->posY = manejador->posY();
 		model2->velX = manejador->velX();
 		model2->velY = manejador->velY();
+		}
 
 		// actualizo posicion de la camara
-		cam.view_dir.x = model2->posX + inicioNivel[0] + 0.5;
-		cam.view_dir.y = model2->posY + 0.5;
+		cam.view_dir.x = model2->posX + inicioNivel[0]; //+ 0.5;
+		cam.view_dir.y = model2->posY +  0.25;
 		cam.view_dir.z = 0;
 		//Dibujo la escena
 		if (is_active) {

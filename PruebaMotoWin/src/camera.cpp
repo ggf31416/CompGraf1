@@ -213,4 +213,10 @@ void move_up(struct cam_t & cam, GLfloat dist)
 }
 
 
+void acercar_camara(struct cam_t& cam, GLfloat frac){
+	frac = 1 - frac;
+	if (cam.radio * frac < 0.25) cam.radio = 0.25;
+	else if (cam.radio * frac > 10) cam.radio = 10;
+	else cam.radio *= frac;
+}
 

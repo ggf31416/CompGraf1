@@ -40,6 +40,8 @@ void rot_z(struct cam_t & cam, GLfloat angle);
 void move_forward(struct cam_t & cam, GLfloat dist);
 void move_up(struct cam_t & cam, GLfloat dist);
 void strafe_right(struct cam_t & cam, GLfloat dist);
+void acercar_camara(struct cam_t& cam, GLfloat dist);
+
 
 
 
