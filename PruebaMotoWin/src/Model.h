@@ -7,6 +7,10 @@
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "FreeImage/FreeImage.h"
+#include <vector>
+#include <map>
+
 
 
 #define aisgl_min(x,y) (x<y?x:y)
@@ -14,8 +18,20 @@
 
 namespace model {
 
+struct TextureAndPath
+
+{
+
+	GLuint hTexture;
+
+	aiString pathName;
+
+};
+
+
 class Model {
 public:
+
 	GLdouble velX,velY,posX,posY;//Posiciones son los minimos del bounding box. (velocidad en segundos/unidad)
 	Model();
 	virtual ~Model();
@@ -30,6 +46,8 @@ public:
 	void acelerar(GLdouble aX,GLdouble aY,GLdouble dt);
 	bool usarWireframe;
 
+
+
 private:
 	static const GLdouble relLargoEjeTrasero = 0.173553719; //(2.1/12.1)
 	static const GLdouble relAltoEjeTrasero = 0.271428571; //(1.9/7)
@@ -39,6 +57,11 @@ private:
 	aiVector3D scene_min, scene_max, scene_center;
 	/* current rotation angle */
 	float angle;
+	std::vector<TextureAndPath> texturesAndPaths;
+
+
+
+	void recursiveTextureLoad(const struct aiScene *sc, const struct aiNode* nd);
 	void reshape(int width, int height);
 	void color4_to_float4(const aiColor4D *c, float f[4]);
 	void set_float4(float f[4], float a, float b, float c, float d);

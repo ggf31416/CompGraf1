@@ -4,6 +4,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <SDL/SDL.h>
+#include <string>
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -15,6 +16,8 @@
 #include "Fisica/ManejadorFisica.h"
 #include "Fisica/Rampa.h"
 #include "Fisica/MatGeoLib/Geometry/OBB.h"
+
+#include "FreeImage/FreeImage.h"
 
 #define SCREEN_WIDTH  1000
 #define SCREEN_HEIGHT 640
@@ -63,6 +66,8 @@ GLuint ramp_list;
 GLfloat inicioNivel[3] = { -10, 0, 0 };
 GLfloat finNivel[3] = { 10, 0, 0 };
 GLdouble angulo = 0; //Angulo de inclinacion de la moto
+
+GLuint texturaConcreto = 0;
 bool wireframe = false;
 bool sostengoClickDerecho = false;
 bool enPausa = false;
@@ -83,6 +88,69 @@ void cambiarWireframe() {
 	model2->usarWireframe = wireframe;
 	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 }
+
+bool cargarTextura(GLuint& textura, int& w, int& h,const char* archivo){
+    /*char* archivo = new char[50];
+    archivo = "res/Models/concreteTexture.jpg";*/
+
+    FREE_IMAGE_FORMAT fif = FreeImage_GetFIFFromFilename(archivo);
+    FIBITMAP* bitmap = FreeImage_Load(fif, archivo);
+    if (bitmap){
+		bitmap = FreeImage_ConvertTo24Bits(bitmap);
+
+		w = FreeImage_GetWidth(bitmap);
+		h = FreeImage_GetHeight(bitmap);
+
+		void* datos = FreeImage_GetBits(bitmap);
+
+
+		glGenTextures(1, &textura); // genera id de texturas
+
+		glBindTexture(GL_TEXTURE_2D, textura);
+
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // filtro para downscaling
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // filtro para upscaling
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+		// specify a two-dimensional texture image
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGR, GL_UNSIGNED_BYTE, datos);
+
+		delete datos;
+		return true;
+    }
+    else {
+
+    	return false;
+    	//exit (0);
+    }
+
+
+}
+
+bool cargarTextura2(GLuint& textura, int& w, int& h,char* archivo){
+	string nombre(archivo);
+	string basePath= "res/Models/";
+
+	string paths[] = {
+			(basePath + nombre),
+			("../../res/Models/" + nombre),
+			("../res/Models/" + nombre),
+			("./" + nombre),
+	};
+	bool cargo = false;
+	for(int i = 0; i < 4 && !cargo; i++){
+		cargo = cargarTextura(textura,w,h,paths[i].c_str());
+	}
+	if (!cargo){
+    	std::cerr << "Error cargando textura " << archivo << std::endl;
+	}
+	return cargo;
+}
+
 void registrarRampa(float x_base, float y_base, float x_size, float z_size,
 		float altura_x_min, float altura_x_max) {
 	float z_base = -z_size / 2;
@@ -198,9 +266,9 @@ void handle_key_press(SDL_keysym * keysym) {
 }
 
 void registrarRampas() {
-	//registrarRampa(-0.5, -0.5, 1, 1, 1, 2);
-	//registrarRampa(2, -0.5, 1, 1, 1, 2);
-	//registrarRampa(4, -0.5, 1, 1, 1, 2);
+	registrarRampa(-0.5, -0.5, 1, 1, 1, 2);
+	registrarRampa(2, -0.5, 1, 1, 1, 2);
+	registrarRampa(4, -0.5, 1, 1, 1, 2);
 	registrarRampa(-4, -0.5, 1, 1, 0, 4);
 }
 
@@ -306,6 +374,9 @@ void ramp_sides(void) {
 
 
 int init_gl() {
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL); // activa usar color como color de material
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClearDepth(1.0f);
 	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
@@ -317,7 +388,29 @@ int init_gl() {
 	glDepthFunc(GL_LEQUAL);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-	setup_pointers();
+
+	char* archivo = new char[50];
+	archivo = "grass1024.jpg";
+	int w, h;
+	if (!texturaConcreto){
+		cargarTextura2(texturaConcreto,w,h,archivo);
+	}
+
+
+	GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	   glEnable(GL_LIGHTING);
+	   glEnable(GL_LIGHT0);
+
+	//setup_pointers();
 
 	// check OpenGL error
 	while ((err = glGetError()) != GL_NO_ERROR) {
@@ -327,6 +420,8 @@ int init_gl() {
 
 	return (TRUE);
 }
+
+
 
 
 int draw_gl_scene() {
@@ -339,12 +434,10 @@ int draw_gl_scene() {
 	static GLuint prev_sind = 0;
 
 	/*start drawing box*/
-	//glClear(GL_COLOR_BUFFER_BIT);
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 	render(cam);
 	glPushMatrix();
-	//render(cam);
 	glTranslatef(0.0, -0.5, -6.0);
 	glScalef(3.0, 1.0, 3.0);
 	GLfloat size = 8.0;
@@ -410,7 +503,12 @@ int draw_gl_scene() {
 
 	glTranslated(inicioNivel[0] + (max->x - min->x) / 2, 0, 0);
 
+	glDisable(GL_COLOR_MATERIAL);
 	model2->draw(angulo , manejador->getAnguloVertical());
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_LIGHTING);
+
+
 
 	glPopMatrix();
 
@@ -424,7 +522,9 @@ int draw_gl_scene() {
 
 	glPointSize(10);
 	glBegin(GL_POINTS);
+
 	glColor3d(0, 1, 0);
+
 	glVertex3d(-10, 0, 0);
 	glColor3d(0, 0, 1);
 	glVertex3d(x, y, z);
@@ -435,8 +535,34 @@ int draw_gl_scene() {
 	delete min;
 	delete max;
 
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texturaConcreto);
+
+	glBegin(GL_QUADS);
+	glTexCoord2d(0,0);
+	glColor3d(0.5, 0.5, 0.5);
+	glVertex3d(-20, 0, -20);
+	glTexCoord2d(0,1);
+	glVertex3d(-20,  0,20);
+	glTexCoord2d(1,1);
+	glVertex3d(20,  0,20);
+	glTexCoord2d(1,0);
+	glVertex3d(20,  0,-20);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+	//glEnd();
+
+	GLenum err;
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		cerr << "OpenGL error: " << err << endl;
+
+	}
+
+
 	/* Draw it to the screen */
 	SDL_GL_SwapBuffers();
+
 
 	/* Gather our frames per second */
 	Frames++;
@@ -475,10 +601,13 @@ int main(int argc, char *argv[]) {
 	/* whether or not the window is active */
 	int is_active = TRUE;
 	//model::Model* model;
-	const GLchar* path = "res/Models/moto3.3ds";
-	const GLchar* path_try2 = "../../res/Models/moto3.3ds";
-	const GLchar* path_try3 = "../res/Models/moto3.3ds";
-	const GLchar* path_try4 = "./moto3.3ds";
+	string nombre = "moto3.3ds";
+	string basePath= "res/Models/";
+
+	string path = (basePath + nombre).c_str();
+	string  path_try2 = ("../../res/Models/" + nombre);
+	string  path_try3 = ("../res/Models/" + nombre);
+	string  path_try4 = ("./" + nombre);
 
 	model2 = new model::Model();
 	//Variables del juego
@@ -549,10 +678,14 @@ int main(int argc, char *argv[]) {
 	//Cargo modelo Assimp (intento varios lados)
 	// nota: inverti el valor de retorno de loadasset, 1 si cargo, 0 si fallo
 	model2->usarWireframe = wireframe;
-	int cargo = model2->loadasset(path) || model2->loadasset(path_try2)
-			|| model2->loadasset(path_try3) || model2->loadasset(path_try4);
+	int cargo = model2->loadasset(path.c_str()) || model2->loadasset(path_try2.c_str())
+			|| model2->loadasset(path_try3.c_str()) || model2->loadasset(path_try4.c_str());
 	if (!cargo) {
 		cout << "Couldn't load model: " << endl;
+		cout << "path1" << path << endl;
+		cout << "path2" << path_try2 << endl;
+		cout << "path3" << path_try3 << endl;
+		cout << "path4" << path_try4 << endl;
 	} else {
 		aiVector3D *min = new aiVector3D(), *max = new aiVector3D();
 		model2->get_bounding_box(min, max);
@@ -702,71 +835,74 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		//Actualizo segun tiempo transcurrido.
-		//Manejo de moto
+		if (!done){
 
-		//Aceleracion y frenado
-		GLdouble acelAuxX = 0;
-		GLdouble acelAuxY = 0;
-		if (keystate[SDLK_RIGHT] and model2->velX >= 0) {
-			acelAuxX = acelX + rozamientoX;
-		} else if (keystate[SDLK_RIGHT] and model2->velX < 0) {
-			acelAuxX = acelX - rozamientoX;
-		} else if (keystate[SDLK_LEFT] and model2->velX > 0) {
-			acelAuxX = frenoX + rozamientoX;
-		} else if (keystate[SDLK_LEFT] and model2->velX <= 0) {
-			acelAuxX = desacelX - rozamientoX;
-		} else if (model2->velX > 0) {
-			acelAuxX = rozamientoX;
-		} else if (model2->velX < 0) {
-			acelAuxX = -rozamientoX;
-		}
+			//Actualizo segun tiempo transcurrido.
+			//Manejo de moto
 
-		//Levantar rueda moto
-		if (keystate[SDLK_UP]) {
-			angulo += (GLdouble) 70 * dt / 1000;
-			if (angulo > 70) {
-				angulo = 70;
-			}
-		} else {
-			angulo -= (GLdouble) 70 * dt / 1000;
-			if (angulo < 0) {
-				angulo = 0;
-			}
-		}
-
-		GLdouble oldPosX = model2->posX;
-		GLdouble oldPosY = model2->posY;
-		//model2->acelerar(acelAuxX,acelAuxY,(GLdouble) dt/1000);
-		//manejador->establecerPosicionMoto(model2->posX-10,model2->posY,0);
-		manejador->acelerarMotoAdelante(acelAuxX);
-		//std::cout << "Pos Moto: " << model2->posX << ", " << model2->posY << "\n";
-
-		/*cam.pos.x += model2->posX - oldPosX;
-		 cam.pos.y += model2->posY - oldPosY;
-		 cam.pos.z = 3;*/
-
-		//render(cam);
-		if (!enPausa){
-			manejador->simular(dt / 1000.0f );
-
-			if (manejador->colisiono && model2->velX > 0) {
-	//		 		model2->velX = 0;
-				manejador->setVelocidadX(0);
-				//model2->posX -= 0.1;
-				cout << "Colisiono!!!" << "\n";
+			//Aceleracion y frenado
+			GLdouble acelAuxX = 0;
+			GLdouble acelAuxY = 0;
+			if (keystate[SDLK_RIGHT] and model2->velX >= 0) {
+				acelAuxX = acelX + rozamientoX;
+			} else if (keystate[SDLK_RIGHT] and model2->velX < 0) {
+				acelAuxX = acelX - rozamientoX;
+			} else if (keystate[SDLK_LEFT] and model2->velX > 0) {
+				acelAuxX = frenoX + rozamientoX;
+			} else if (keystate[SDLK_LEFT] and model2->velX <= 0) {
+				acelAuxX = desacelX - rozamientoX;
+			} else if (model2->velX > 0) {
+				acelAuxX = rozamientoX;
+			} else if (model2->velX < 0) {
+				acelAuxX = -rozamientoX;
 			}
 
-		model2->posX = manejador->posX() - inicioNivel[0];
-		model2->posY = manejador->posY();
-		model2->velX = manejador->velX();
-		model2->velY = manejador->velY();
-		}
+			//Levantar rueda moto
+			if (keystate[SDLK_UP]) {
+				angulo += (GLdouble) 70 * dt / 1000;
+				if (angulo > 70) {
+					angulo = 70;
+				}
+			} else {
+				angulo -= (GLdouble) 70 * dt / 1000;
+				if (angulo < 0) {
+					angulo = 0;
+				}
+			}
 
-		// actualizo posicion de la camara
-		cam.view_dir.x = model2->posX + inicioNivel[0]; //+ 0.5;
-		cam.view_dir.y = model2->posY +  0.25;
-		cam.view_dir.z = 0;
+			GLdouble oldPosX = model2->posX;
+			GLdouble oldPosY = model2->posY;
+			//model2->acelerar(acelAuxX,acelAuxY,(GLdouble) dt/1000);
+			//manejador->establecerPosicionMoto(model2->posX-10,model2->posY,0);
+			manejador->acelerarMotoAdelante(acelAuxX);
+			//std::cout << "Pos Moto: " << model2->posX << ", " << model2->posY << "\n";
+
+			/*cam.pos.x += model2->posX - oldPosX;
+			 cam.pos.y += model2->posY - oldPosY;
+			 cam.pos.z = 3;*/
+
+			//render(cam);
+			if (!enPausa){
+				manejador->simular(dt / 1000.0f );
+
+				if (manejador->colisiono && model2->velX > 0) {
+		//		 		model2->velX = 0;
+					manejador->setVelocidadX(0);
+					//model2->posX -= 0.1;
+					cout << "Colisiono!!!" << "\n";
+				}
+
+			model2->posX = manejador->posX() - inicioNivel[0];
+			model2->posY = manejador->posY();
+			model2->velX = manejador->velX();
+			model2->velY = manejador->velY();
+			}
+
+			// actualizo posicion de la camara
+			cam.view_dir.x = model2->posX + inicioNivel[0]; //+ 0.5;
+			cam.view_dir.y = model2->posY +  0.25;
+			cam.view_dir.z = 0;
+		}
 		//Dibujo la escena
 		if (is_active) {
 			draw_gl_scene();

@@ -1,6 +1,7 @@
 #include "Model.h"
 #include <iostream>
 #include "Fisica/MatGeoLib/Time/Clock.h"
+#include <string>
 
 namespace model {
 
@@ -17,7 +18,9 @@ Model::Model() {
 
 }
 
-Model::~Model() {}
+Model::~Model() {
+	aiReleaseImport(scene);
+}
 
 /* ---------------------------------------------------------------------------- */
 void Model::reshape(int width, int height){
@@ -113,6 +116,17 @@ void Model::apply_material(const aiMaterial *mtl)
 	int wireframe;
 	unsigned int max;
 
+	int texIndex = 0;
+	aiString texPath;	//contains filename of texture
+
+	/*if(AI_SUCCESS == mtl->GetTexture(aiTextureType_DIFFUSE, texIndex, &texPath))
+		{
+			//bind texture
+			unsigned int texId = texturesAndPaths[texPath.data];
+			glBindTexture(GL_TEXTURE_2D, texId);
+		}*/
+
+
 	set_float4(c, 0.8f, 0.8f, 0.8f, 1.0f);
 	if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse))
 		color4_to_float4(&diffuse, c);
@@ -185,6 +199,10 @@ void Model::recursive_render (const aiScene *sc, const aiNode* nd)
 	for (; n < nd->mNumMeshes; ++n) {
 		const aiMesh* mesh = scene->mMeshes[nd->mMeshes[n]];
 
+
+		if(n < texturesAndPaths.size())
+			glBindTexture(GL_TEXTURE_2D, texturesAndPaths[n].hTexture);
+
 		apply_material(sc->mMaterials[mesh->mMaterialIndex]);
 
 		if(mesh->mNormals == NULL) {
@@ -212,13 +230,15 @@ void Model::recursive_render (const aiScene *sc, const aiNode* nd)
 					glColor4fv((GLfloat*)&mesh->mColors[0][index]);
 				if(mesh->mNormals != NULL)
 					glNormal3fv(&mesh->mNormals[index].x);
+				if(mesh->HasTextureCoords(0))
+					glTexCoord2f(mesh->mTextureCoords[0][index].x, mesh->mTextureCoords[0][index].y);
 				glVertex3fv(&mesh->mVertices[index].x);
 			}
 
 			glEnd();
 		}
 		//Para que no se vea rojo
-		glDisable(GL_LIGHTING);
+		//glDisable(GL_LIGHTING);
 
 	}
 
@@ -270,7 +290,7 @@ void Model::display()
 
 	/* scale the whole asset to fit into our view frustum */
 	tmp = scene_max.x-scene_min.x;
-	tmp = aisgl_max(scene_max.y - scene_min.y,tmp);
+	tmp =  aisgl_max(scene_max.y - scene_min.y,tmp);
 	tmp = aisgl_max(scene_max.z - scene_min.z,tmp);
 	tmp = 1.f / tmp;
 	glScalef(tmp, tmp, tmp);
@@ -297,6 +317,126 @@ void Model::display()
 	//do_motion();
 }
 
+
+// basado en http://www.gamedev.net/topic/582240-assimp-drawing-textured-model/
+void Model::recursiveTextureLoad(const struct aiScene *sc, const struct aiNode* nd)
+
+{
+
+	int i;
+	unsigned int n = 0, t;
+	 aiMatrix4x4 m = nd->mTransformation;
+
+
+
+	// update transform
+
+	aiTransposeMatrix4(&m);
+	glPushMatrix();
+	glMultMatrixf((float*)&m);
+
+
+
+	// draw all meshes assigned to this node
+
+	for (; n < nd->mNumMeshes; ++n)
+	{
+
+		const struct aiMesh* mesh = sc->mMeshes[nd->mMeshes[n]];
+		unsigned int cont = aiGetMaterialTextureCount(sc->mMaterials[mesh->mMaterialIndex], aiTextureType_DIFFUSE);
+		struct aiString* str = (aiString*)malloc(sizeof(struct aiString));
+
+		if(cont > 0)
+		{
+			//aiGetMaterialString(sc->mMaterials[mesh->mMaterialIndex],AI_MATKEY_TEXTURE_DIFFUSE(0),str);
+			aiGetMaterialTexture(sc->mMaterials[mesh->mMaterialIndex],aiTextureType_DIFFUSE,0,str,0,0,0,0,0,0);
+
+			// See if another mesh is already using this texture, if so, just copy GLuint instead of remaking entire texture
+			bool newTextureToBeLoaded = true;
+			for(int x = 0; x < texturesAndPaths.size(); x++)
+			{
+				if(texturesAndPaths[x].pathName == *str)
+				{
+					TextureAndPath reusedTexture;
+					reusedTexture.hTexture = texturesAndPaths[x].hTexture;
+					reusedTexture.pathName = *str;
+					texturesAndPaths.push_back(reusedTexture);
+					newTextureToBeLoaded = false;
+
+					std::cout << "Texture reused." << std::endl;
+
+					break;
+
+				}
+			}
+
+
+
+			if(newTextureToBeLoaded)
+			{
+				FREE_IMAGE_FORMAT formato = FreeImage_GetFileType(str->data,0);
+				//Automatocally detects the format(from over 20 formats!)
+				FIBITMAP* imagen = FreeImage_Load(formato, str->data);
+				FIBITMAP* temp = imagen;
+				imagen = FreeImage_ConvertTo32Bits(imagen);
+
+				FreeImage_Unload(temp);
+				int w = FreeImage_GetWidth(imagen);
+				int h = FreeImage_GetHeight(imagen);
+
+
+				//Some debugging code
+				char* pixeles = (char*)FreeImage_GetBits(imagen);
+
+				//FreeImage loads in BGR format, so you need to swap some bytes(Or use GL_BGR).
+				//Now generate the OpenGL texture object
+
+				TextureAndPath newTexture;
+				newTexture.pathName = *str;
+				glGenTextures(1, &newTexture.hTexture);
+
+
+
+				glBindTexture(GL_TEXTURE_2D, newTexture.hTexture);
+				glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA, w, h, 0, GL_BGRA_EXT,GL_UNSIGNED_BYTE,(GLvoid*)pixeles );
+				//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+				glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+				glBindTexture(GL_TEXTURE_2D, newTexture.hTexture);
+
+
+				GLenum huboError = glGetError();
+
+
+
+				if(huboError)
+				{
+					std::cout<<"There was an error loading the texture"<<std::endl;
+				}
+
+
+
+				std::cout << "texture loaded." << std::endl;
+
+
+				texturesAndPaths.push_back(newTexture);
+
+			}
+		}
+	}
+
+
+	// Get textures from all children
+
+	for (n = 0; n < nd->mNumChildren; ++n)
+		recursiveTextureLoad(sc, nd->mChildren[n]);
+
+}
+
+
 /* ---------------------------------------------------------------------------- */
 int Model::loadasset (const char* path)
 {
@@ -312,7 +452,9 @@ int Model::loadasset (const char* path)
 		scene_center.x = (scene_min.x + scene_max.x) / 2.0f;
 		scene_center.y = (scene_min.y + scene_max.y) / 2.0f;
 		scene_center.z = (scene_min.z + scene_max.z) / 2.0f;
-		std::cout << "ms loadasset: " << clock.MillisecondsSinceF(t1) << " ms\n";
+		std::cout << "ms loadasset: " << path <<  "  " << clock.MillisecondsSinceF(t1) << " ms\n";
+		recursiveTextureLoad(scene, scene->mRootNode);
+
 		return 1;
 	}
 	std::cout << "ms loadasset failed: " << clock.MillisecondsSinceF(t1) << " ms\n";
@@ -327,9 +469,11 @@ void Model::draw(GLdouble angulo,GLdouble angulo_centro)
 	get_bounding_box(min,max);
 	GLdouble largoMoto = (max->x-min->x);
 	GLdouble altoMoto = (max->y-min->y);
+	float escala = largoMoto > 1 ? 1/largoMoto : 1;
+
 	//Muevo moto
 	glTranslated(posX - largoMoto/2,posY ,0);
-
+	glScalef(escala, escala, escala);
 	//Roto moto
 	glTranslated(-largoMoto/2+largoMoto*relLargoEjeTrasero,altoMoto*relAltoEjeTrasero,0);
 	glRotated(angulo,0,0,1);
