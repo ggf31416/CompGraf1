@@ -757,7 +757,7 @@ int main(int argc, char *argv[]) {
 				cout << "Colisiono!!!" << "\n";
 			}
 
-		model2->posX = manejador->posX() + 10;
+		model2->posX = manejador->posX() - inicioNivel[0];
 		model2->posY = manejador->posY();
 		model2->velX = manejador->velX();
 		model2->velY = manejador->velY();
