@@ -107,7 +107,7 @@ private:
 	FisicaMoto* fm;
 	Gravedad g;
 	math::float3 acelGravedad;
-	fisica::Pista* pistaActual;
+	fisica::Pista* pistaActual[2];
 
 	float aceleracionPropia;
 	math::float3 velMoto;

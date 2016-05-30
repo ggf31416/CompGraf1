@@ -198,9 +198,9 @@ void handle_key_press(SDL_keysym * keysym) {
 }
 
 void registrarRampas() {
-	registrarRampa(-0.5, -0.5, 1, 1, 1, 2);
-	registrarRampa(2, -0.5, 1, 1, 1, 2);
-	registrarRampa(4, -0.5, 1, 1, 1, 2);
+	//registrarRampa(-0.5, -0.5, 1, 1, 1, 2);
+	//registrarRampa(2, -0.5, 1, 1, 1, 2);
+	//registrarRampa(4, -0.5, 1, 1, 1, 2);
 	registrarRampa(-4, -0.5, 1, 1, 0, 4);
 }
 

@@ -28,6 +28,10 @@ class FisicaRueda{
 			actualizarBox();
 		}
 
+		void setY(float y){
+			setCentro(float3(centroRueda.x,y,centroRueda.z));
+		}
+
 		bool colisiona(const math::Plane &obs) {
 			return this->boxRueda.Intersects(obs) && this->centroRueda.Distance(obs) < this->radioRueda;
 		}
@@ -50,6 +54,10 @@ class FisicaRueda{
 		math::float3 puntoMasCercano(const math::OBB &obs){
 			return obs.ClosestPoint(this->centroRueda);
 		}
+
+
+
+
 
 
 		bool usarSoloBox;

@@ -26,10 +26,12 @@ ManejadorFisica::ManejadorFisica() {
 	this->fm = new FisicaMoto();
 	this->colisiono = false;
 	this->sobrePista =false;
-	this->pistaActual = 0;
+	this->pistaActual[0] = 0;
+	this->pistaActual[1] = 0;
 	this->aceleracionPropia = 0;
 	this->direccionMoto = float3::unitX;
 	this->velMoto = float3::zero;
+	this->alturaPiso = 0;
 	//checkearCalcY();
 }
 
@@ -96,8 +98,8 @@ void ManejadorFisica::detectarColisionMoto(){
 	detectarColision(fm->boundingBox,tmp);
 	sobrePista =false;
 	colisiono = false;
-	Pista* pista0 = 0;
-	Pista* pista1 = 0;
+	pistaActual[0] = 0;
+	pistaActual[1] = 0;
 	float3 punto0;
 	float3 punto1;
 	for(unsigned int i = 0; i < tmp.size(); i++){
@@ -109,15 +111,18 @@ void ManejadorFisica::detectarColisionMoto(){
 				sobrePista = true;
 				Pista* pista = dynamic_cast<Pista*>(obj);
 				if (pista){
-					acelGravedad = acelPendientePista(pista,this->g);
-					this->pistaActual =pista;
+
+					//this->pistaActual =pista;
 					if (calcularPosicionRuedaSimple(pista,fm->ruedas[0].centroRueda,punto0)){
-						pista0 = pista;
+						pistaActual[0] = pista;
+						//acelGravedad[0] = acelPendientePista(pista,this->g);
 					}
 					if (calcularPosicionRuedaSimple(pista,fm->ruedas[1].centroRueda,punto1)){
-						pista1 = pista;
+						pistaActual[1] = pista;
+						//acelGravedad[1] = acelPendientePista(pista,this->g);
 					}
 				}
+				acelGravedad = acelPendientePista(pista,this->g);
 			}
 			else{
 				colisiono = true;
@@ -125,18 +130,17 @@ void ManejadorFisica::detectarColisionMoto(){
 		}
 		colisiono &= !sobrePista;
 	}
+	if (pistaActual[0] || pistaActual[1]){
+		fm->posicionarPorRuedas(punto0,punto1);
+	}
 	/*if (pista0){
 		fm->ruedas[0].setCentro(punto0);
 	}
 	if (pista1){
 		fm->ruedas[1].setCentro(punto1);
 	}*/
-	if (pista0 || pista1){
-		fm->posicionarPorRuedas(punto0,punto1);
-	}
-	if (!sobrePista){
-		acelGravedad = g.AcelCaida();
-	}
+
+
 }
 
 void ManejadorFisica::test(){
@@ -217,13 +221,11 @@ float3 sinPerdidaDeVelocidad(float3 vel,float3 dirAvanceNueva){
 
 // retorna cambio de velocidad por gravedad
 float3 ManejadorFisica::simularGravedad(float dt){
-
-	if (this->fm->getY() <= alturaPiso){
-		return float3::zero;
-	}
-	else{
+	if (pistaActual[0] && pistaActual[1]){
 		return acelGravedad * dt;
 	}
+	return g.AcelCaida() * dt;
+
 
 }
 
@@ -242,6 +244,22 @@ void ManejadorFisica::simular(float dt){
 	float3 deltaPos = velMoto * dt;
 	fm->trasladar(deltaPos);
 
+	bool ajustarPiso = false;
+	for(int i = 0; i < 2 ;i++){
+		 if (fm->posRueda(i).y < this->alturaPiso){
+			fm->ruedas[i].setY(this->alturaPiso);
+			ajustarPiso = true;
+		}
+
+	}
+	if (ajustarPiso){
+		fm->posicionarPorRuedas(fm->posRueda(0),fm->posRueda(1));
+	}
+
+	/*if (this->fm->getY() < this->alturaPiso){
+		this->fm->setY(this->alturaPiso);
+	}*/
+
 	detectarColisionMoto();
 
 	// calculo direccion moto (rueda delantera - trasera)
@@ -255,9 +273,8 @@ void ManejadorFisica::simular(float dt){
 	else if (this->colisiono){
 		fm->setX(fm->getX() - 0.01);
 	}
-	else if (fm->getY() < this->alturaPiso){
-		fm->setY(this->alturaPiso);
-	}
+
+
 	//if (velMoto->)
 
 	//std::cout << "Pos Moto: "<< fm->getPos() << "SobrePista?: " << this->sobrePista << "\n";
@@ -355,7 +372,7 @@ void checkearCalcY(){
 
 }
 
-float ManejadorFisica::getAltura(){
+/*float ManejadorFisica::getAltura(){
 	if (this->estaSobrePista()){
 		float x = fm->boundingBox.minPoint.x;
 		float z = fm->boundingBox.minPoint.z;
@@ -365,6 +382,6 @@ float ManejadorFisica::getAltura(){
 	else{
 		return fm->boundingBox.minPoint.y;
 	}
-}
+}*/
 
 

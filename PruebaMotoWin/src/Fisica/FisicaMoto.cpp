@@ -52,7 +52,11 @@ void FisicaMoto::setTamanio(float largo,float alto,float profundidad,float y_rue
 	FisicaRueda r1(float3(x_rueda1 * largo, radioRueda,profundidad / 2),radioRueda,anchoRueda);
 	this->ruedas[0] = r0;
 	this->ruedas[1] = r1;
+	float3 centroRuedas = ruedas[0].centroRueda + (ruedas[1].centroRueda - ruedas[0].centroRueda) / 2;
+
 	actualizarBBox();
+	altoCentroBox = (boxSuperior.pos - centroRuedas).Length();
+	largoEntreRuedas = (ruedas[1].centroRueda - ruedas[0].centroRueda).Length() / 2;
 }
 
 void FisicaMoto::trasladar(float3 vec){
@@ -97,15 +101,14 @@ void FisicaMoto::establecerDireccion(float3  adelante){
 
 // devuelve vector adelante nuevo
 float3 FisicaMoto::posicionarPorRuedas(math::float3 rueda0,math::float3 rueda1){
-	float3 centroRuedas = ruedas[0].centroRueda + (ruedas[1].centroRueda - ruedas[0].centroRueda) / 2;
-	float altoCentroBox = (boxSuperior.pos - centroRuedas).Length();
-	float largoOriginal = (ruedas[1].centroRueda - ruedas[0].centroRueda).Length() / 2;
+	//float3 centroRuedas = ruedas[0].centroRueda + (ruedas[1].centroRueda - ruedas[0].centroRueda) / 2;
+
 	float3 dir = rueda1 - rueda0;
 	establecerDireccion(dir);
-	centroRuedas =   rueda0 + (rueda1 - rueda0) / 2;
+	float3 centroRuedas =   rueda0 + (rueda1 - rueda0) / 2;
 	boxSuperior.pos = centroRuedas + boxSuperior.axis[1] * altoCentroBox;
-	this->ruedas[0].setCentro( centroRuedas - boxSuperior.axis[0] * largoOriginal);
-	this->ruedas[1].setCentro( centroRuedas + boxSuperior.axis[0] * largoOriginal);
+	this->ruedas[0].setCentro( centroRuedas - boxSuperior.axis[0] * largoEntreRuedas);
+	this->ruedas[1].setCentro( centroRuedas + boxSuperior.axis[0] * largoEntreRuedas);
 	return dir;
 }
 

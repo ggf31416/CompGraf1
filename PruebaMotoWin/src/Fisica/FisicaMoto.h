@@ -61,11 +61,15 @@ public:
 	FisicaRueda* ruedas;
 	math::OBB boxSuperior;
 
+	math::float3 posRueda(int i){
+		return this->ruedas[i].centroRueda;
+	}
 
 	void dibujarBB();
 
 private:
-
+	float altoCentroBox;
+	float largoEntreRuedas;
 
 	math::float3 ejes[];
 
