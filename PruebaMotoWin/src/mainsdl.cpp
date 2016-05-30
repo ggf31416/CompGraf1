@@ -45,9 +45,13 @@
 #define f3Tof(v) v.x,v.y,v.z
 
 #define DRAW_QUAD2(P1,P2,P3,P4) glBegin(GL_QUADS);\
+								glTexCoord2d(0,0);\
                                 glVertex3f(f3Tof(P1));\
+                                glTexCoord2d(0,1);\
                                 glVertex3f(f3Tof(P2));\
+                                glTexCoord2d(1,1);\
                                 glVertex3f(f3Tof(P3));\
+                                glTexCoord2d(1,0);\
                                 glVertex3f(f3Tof(P4));\
                         glEnd()
 
